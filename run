@@ -1,0 +1,26 @@
+#!/bin/bash
+
+VERSION="1.0.0"
+
+kill_it () {
+    (ps aux | egrep "$1" | egrep -v grep | awk '{ print $2 }' | xargs kill -9 &> /dev/null)
+}
+
+test () {
+    bulk
+    sleep 1
+    python run_tests.py
+}
+
+bulk () {
+    curl -XDELETE 'http://localhost:1980/_all'
+    curl -s -XPOST 'http://localhost:1980/_bulk' --data-binary @tornadoes/testes/data/materias.bulk; echo
+}
+
+if [ $1 ]; then
+    $1;
+else
+    echo  "   bulk - adiciona no ES o bulk buscaes/data/materias.bulk" 
+    echo  "   test - roda os testes"
+    exit 1
+fi;

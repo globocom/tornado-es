@@ -1,0 +1,2 @@
+{ "index" : {"_index":"teste","_type":"materia","_id":"http://localhost/fast"}}
+{"Subeditorias":["Economia"],"Portal":"G1","DataPublicacao":"2012-04-26T19:12:02Z","Macrotema":"Noticias","Editoria":"Economia","TipoMidia":"Matéria","ControleAcesso":"aberto","Tags":"test","Corpo":"corpo de teste","ID":"http://localhost/fast","URL":"http://localhost/","Assunto":"test","FormatoConteudo":"texto","DataAtualizacao":"2012-04-26T19:12:03Z","URLThumbnail":"http://localhost/teste.png","Titulo":"titulo de teste"}
