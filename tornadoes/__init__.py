@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tornado.httpclient import AsyncHTTPClient
+from tornado.ioloop import IOLoop
 
 class ESConnection:
     
@@ -10,11 +11,18 @@ class ESConnection:
         self.port = port
         self.client = AsyncHTTPClient(self.io_loop)
         
-    def get(self, callback, indice, valor, tipo=None, campo=None):
-        tipo_query = "/%1s" % tipo if tipo else ""
-        campo_query = "%1s:" %campo if campo else "_all:"
+    def get(self, callback, **kwargs):
+        index = kwargs['index'] or '_all'
+        type = '/' + kwargs.get('type') if kwargs.has_key('type') else ''
+        field = kwargs.get('field','_all') + ':'
+        value = kwargs.get('value', '')
+        size = kwargs.get('size', 10)
+        page = kwargs.get('page', 1)
+        begin = (page-1)*size        
         
-        path = "/%(indice)s%(tipo)s/_search?q=%(campo)s%(valor)s" % {"indice": indice, "tipo": tipo_query, "campo": campo_query, "valor": valor}
+        path = "/%(index)s%(type)s/_search?q=%(field)s%(value)s&from=%(begin)d&size=%(size)d" % {"index": index, "type": type, "field": field, 
+                                                                                                  "value": value, "begin": begin, "size":size}
+        
         self.get_by_path(path, callback)
         
     def get_by_path(self, path, callback):
