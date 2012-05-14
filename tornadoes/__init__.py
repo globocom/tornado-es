@@ -12,7 +12,7 @@ class ESConnection:
         self.client = AsyncHTTPClient(self.io_loop)
         
     def get(self, callback, **kwargs):
-        index = kwargs['index'] or '_all'
+        index = kwargs.get('index', '_all')
         type = '/' + kwargs.get('type') if kwargs.has_key('type') else ''
         field = kwargs.get('field','_all') + ':'
         value = kwargs.get('value', '')
