@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from tornado.httpclient import AsyncHTTPClient
+from tornado.ioloop import IOLoop
 
 class ESConnection:
     
