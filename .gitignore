@@ -2,3 +2,6 @@ build/
 dist/
 tornadoes.egg-info/
 *.pyc
+.pydevproject
+.project
+.settings/

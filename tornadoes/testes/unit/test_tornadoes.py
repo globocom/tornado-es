@@ -25,8 +25,9 @@ class TestESConnection(AsyncTestCase):
         self.es_connection = ESConnection("localhost",  "1980", self.io_loop)
         self.es_connection.get_by_path("/_search?q=_id:http\:\/\/g1.be.globoi.com\/noticia\/1\/fast", self.tratar_resposta_consulta_simples)
         self.wait()
-    
+        
     def test_consulta_especificando_tipo_campo(self):
         self.es_connection = ESConnection("localhost",  "1980", self.io_loop)
-        self.es_connection.get(self.tratar_resposta_consulta_especificando_tipo_campo, "teste", "http\:\/\/g1.be.globoi.com\/noticia\/1\/fast", "materia", "_id")
+        self.es_connection.get(self.tratar_resposta_consulta_especificando_tipo_campo, index="teste", value="http\:\/\/g1.be.globoi.com\/noticia\/1\/fast", 
+                                      type="materia", field="_id", page=1, size=10)
         self.wait()
