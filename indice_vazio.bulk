@@ -1,3 +1,0 @@
-{ "create" : { "_index" : "teste", "_type" : "teste"} }
-{}
-{ "delete" : { "_index" : "teste", "_type" : "teste", "_id" : "1" } }
