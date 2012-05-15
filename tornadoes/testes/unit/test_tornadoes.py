@@ -10,7 +10,7 @@ class TestESConnection(AsyncTestCase):
     
     def setUp(self):
         self.io_loop = self.get_new_ioloop()
-        self.es_connection = ESConnection("localhost",  "1980", self.io_loop)
+        self.es_connection = ESConnection("localhost", "1980", self.io_loop)
         
     def tearDown(self):
         if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):
@@ -39,6 +39,13 @@ class TestESConnection(AsyncTestCase):
         self.es_connection.get(self.tratar_resposta_consulta_especificando_tipo_campo, index="teste", value="http\:\/\/g1.be.globoi.com\/noticia\/1\/fast", 
                                       type="materia", field="_id")
         self.wait()
-        
-#    def test_consulta_paginacao(self):
-#        pass
+    
+    def verificar_quantidade_de_registros(self, response):
+        assert response.code == 200
+        resposta = json.loads(response.body)
+        assert resposta["hits"]["total"] == 13
+        self.stop()
+    
+    def test_retorna_todos_os_registros(self):
+        self.es_connection.get(self.verificar_quantidade_de_registros)
+        self.wait()
