@@ -5,7 +5,7 @@ from tornado.ioloop import IOLoop
 
 class ESConnection:
     
-    def __init__(self, host='', port= '9200', io_loop=None):
+    def __init__(self, host='localhost', port= '9200', io_loop=None):
         self.io_loop = io_loop or IOLoop.instance()
         self.host = host
         self.port = port
@@ -13,14 +13,14 @@ class ESConnection:
         
     def get(self, callback, **kwargs):
         index = kwargs.get('index', '_all')
-        type = '/' + kwargs.get('type') if kwargs.has_key('type') else ''
+        type_ = '/' + kwargs.get('type') if kwargs.has_key('type') else ''
         field = kwargs.get('field','_all') + ':'
-        value = kwargs.get('value', '')
+        value = kwargs.get('value', '*')
         size = kwargs.get('size', 10)
         page = kwargs.get('page', 1)
-        begin = (page-1)*size        
+        begin = (page-1)*size
         
-        path = "/%(index)s%(type)s/_search?q=%(field)s%(value)s&from=%(begin)d&size=%(size)d" % {"index": index, "type": type, "field": field, 
+        path = "/%(index)s%(type)s/_search?q=%(field)s%(value)s&from=%(begin)d&size=%(size)d" % {"index": index, "type": type_, "field": field, 
                                                                                                   "value": value, "begin": begin, "size":size}
         
         self.get_by_path(path, callback)
