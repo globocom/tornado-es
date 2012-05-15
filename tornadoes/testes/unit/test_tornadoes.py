@@ -43,9 +43,32 @@ class TestESConnection(AsyncTestCase):
     def verificar_quantidade_de_registros(self, response):
         assert response.code == 200
         resposta = json.loads(response.body)
-        assert resposta["hits"]["total"] == 13
+        assert resposta["hits"]["total"] == 28
         self.stop()
     
-    def test_retorna_todos_os_registros(self):
+    def test_consulta_todos_os_registros(self):
         self.es_connection.get(self.verificar_quantidade_de_registros)
         self.wait()
+        
+        
+    def verificar_busca_indice_especifico(self, response):
+        assert response.code == 200
+        resposta = json.loads(response.body)
+        assert resposta["hits"]["total"] == 14
+        self.stop()
+    
+    def test_busca_indice_especifico(self):
+        self.es_connection.get(self.verificar_busca_indice_especifico, index="outroteste")
+        self.wait()
+        
+    def verificar_busca_tipo_especifico(self, response):
+        assert response.code == 200
+        resposta = json.loads(response.body)
+        assert resposta["hits"]["total"] == 2
+        self.stop()
+    
+    def test_busca_tipo_especifico(self):
+        self.es_connection.get(self.verificar_busca_tipo_especifico, type='galeria')
+        self.wait()
+        
+        
