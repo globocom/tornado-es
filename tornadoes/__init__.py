@@ -26,5 +26,4 @@ class ESConnection:
         
     def get_by_path(self, path, callback):
         url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
-        print url
         self.client.fetch(url, callback)
