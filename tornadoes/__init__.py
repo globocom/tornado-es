@@ -22,9 +22,9 @@ class ESConnection:
         
         path = "/%(index)s%(type)s/_search?q=%(field)s%(value)s&from=%(begin)d&size=%(size)d" % {"index": index, "type": type_, "field": field, 
                                                                                                   "value": value, "begin": begin, "size":size}
-        
         self.get_by_path(path, callback)
         
     def get_by_path(self, path, callback):
         url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
+        print url
         self.client.fetch(url, callback)
