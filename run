@@ -8,14 +8,13 @@ kill_it () {
 
 test () {
     bulk
-    sleep 1
     python run_tests.py
 }
 
 bulk () {
     curl -XDELETE 'http://localhost:1980/_all'; echo
-    curl -s -XPOST 'http://localhost:1980/_bulk' --data-binary @tornadoes/testes/data/materias.bulk; echo
-    curl -s -XPOST 'http://localhost:1980/_bulk' --data-binary @tornadoes/testes/data/outrasmaterias.bulk; echo
+    curl -s -XPOST 'http://localhost:1980/_bulk?refresh=true' --data-binary @tornadoes/testes/data/materias.bulk; echo
+    curl -s -XPOST 'http://localhost:1980/_bulk?refresh=true' --data-binary @tornadoes/testes/data/outrasmaterias.bulk; echo
 }
 
 if [ $1 ]; then
