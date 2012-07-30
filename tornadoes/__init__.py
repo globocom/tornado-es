@@ -21,10 +21,12 @@ class ESConnection(object):
         page = kwargs.get('page', 1)
         from_ = (page-1)*size
         source = json.dumps( kwargs.get('source', {"query":{"query_string" : {"query" : "*"}}}))
-        path = "/%(index)s%(type)s/_search?%(querystring)s" % {
+        jsonp_callback = kwargs.get('jsonp_callback', '')
+        path = "/%(index)s%(type)s/_search?%(querystring)s%(jsonp_callback)s" % {
                     "querystring":urlencode({'source':source, 'from': from_, 'size': size}),
                     "index":index,
-                    "type": type_
+                    "type": type_,
+                    "jsonp_callback": "&callback=" + jsonp_callback if jsonp_callback else ""
                     }
         self.get_by_path(path, callback)
 
