@@ -73,3 +73,20 @@ class TestESConnection(AsyncTestCase):
     def test_busca_tipo_especifico(self):
         self.es_connection.search(self.verificar_busca_tipo_especifico, type='galeria')
         self.wait()
+
+    def verificar_resposta_do_multisearch(self, response):
+        resposta = escape.json_decode(response.body)
+        assert response.code == 200, "response.code != 200 \n" + str(resposta)
+        assert resposta['responses'][0]['hits']['hits'][0]['_id'] == "171171", resposta['responses'][0]['hits']['hits'][0]['_id']
+        assert resposta['responses'][1]['hits']['hits'][0]['_id'] == "101010", resposta['responses'][1]['hits']['hits'][0]['_id']
+        self.stop()
+
+    def test_deve_fazer_duas_consultas(self):
+        source='''
+        {}
+        {"query": {"text" : {"_id" : "171171"}}}
+        {}
+        {"query": {"text" : {"_id" : "101010"}}}
+        '''
+        self.es_connection.multi_search(callback=self.verificar_resposta_do_multisearch, source=source)
+        self.wait()
