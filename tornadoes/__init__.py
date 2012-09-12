@@ -15,7 +15,7 @@ class ESConnection(object):
         self.port = port
         self.client = AsyncHTTPClient(self.io_loop)
 
-    def create_path(self, method,**kwargs):
+    def create_path(self, method, **kwargs):
         index = kwargs.get('index', '_all')
         type_ = '/' + kwargs.get('type') if kwargs.has_key('type') else ''
         size = kwargs.get('size', 10)
@@ -49,3 +49,11 @@ class ESConnection(object):
     def get_by_path(self, path, callback):
         url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
         self.client.fetch(url, callback)
+
+    def get(self, index, type, uid, callback):
+        path = '/{index}/{type}/{uid}'.format(**locals())
+        url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
+        def to_dict_callback(response):
+            source = json.loads(response.body).get('_source', {})
+            callback(source)
+        self.client.fetch(url, to_dict_callback)
