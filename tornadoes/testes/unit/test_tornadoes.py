@@ -90,3 +90,11 @@ class TestESConnection(AsyncTestCase):
         '''
         self.es_connection.multi_search(callback=self.verificar_resposta_do_multisearch, source=source)
         self.wait()
+
+    def test_deve_acessar_um_documento_especifico(self):
+        def callback(data):
+            self.assertEqual(data['Portal'], "G1")
+            self.assertEqual(data['Macrotema'], "Noticias")
+            self.stop()
+        self.es_connection.get(index="teste", type="materia", uid="171171", callback=callback)
+        self.wait()
