@@ -21,9 +21,13 @@ class ESConnection(object):
         size = kwargs.get('size', 10)
         page = kwargs.get('page', 1)
         from_ = (page-1)*size
+        routing = kwargs.get('routing', '')
         jsonp_callback = kwargs.get('jsonp_callback', '')
+        parameters = {'from': from_, 'size': size}
+        if routing:
+            parameters["routing"] = routing
         path = "/%(index)s%(type)s/_%(method)s?%(querystring)s%(jsonp_callback)s" % {
-                    "querystring":urlencode({'from': from_, 'size': size}),
+                    "querystring":urlencode(parameters),
                     "method": method,
                     "index":index,
                     "type": type_,
