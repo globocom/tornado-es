@@ -2,9 +2,11 @@
 
 import json
 
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
-from tornado.ioloop import IOLoop
+from models import BulkList
+
 from urllib import urlencode
+from tornado.ioloop import IOLoop
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 
 class ESConnection(object):
@@ -13,6 +15,7 @@ class ESConnection(object):
         self.io_loop = io_loop or IOLoop.instance()
         self.host = host
         self.port = port
+        self.bulk = BulkList()
         self.client = AsyncHTTPClient(self.io_loop)
 
     def create_path(self, method, **kwargs):
@@ -40,10 +43,13 @@ class ESConnection(object):
         source = json.dumps( kwargs.get('source', {"query":{"query_string" : {"query" : "*"}}}))
         self.post_by_path(path, callback, source)
 
-    def multi_search(self, callback, **kwargs):
-        path = self.create_path("msearch", **kwargs)
-        source = kwargs.get('source', {"query":{"query_string" : {"query" : "*"}}})
-        self.post_by_path(path, callback, source)
+    def multi_search(self, index, source):
+        self.bulk.add(index, source)
+
+    def apply_search(self, callback):
+        path = "/_msearch"
+        source = self.bulk.prepare_search()
+        self.post_by_path(path, callback, source=source)
 
     def post_by_path(self, path, callback, source):
         url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
