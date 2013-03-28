@@ -13,7 +13,7 @@ class BulkList(object):
 
     def add(self, index, source):
         with self.lock:
-            command = {"_index": index} if index else {}
+            command = {"index": index} if index else {}
             source = "%s\n%s" % (json.dumps(command), json.dumps(source))
             self.bulk_list.append(source)
 

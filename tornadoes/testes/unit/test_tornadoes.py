@@ -86,8 +86,8 @@ class TestESConnection(AsyncTestCase):
         source = {"query": {"text": {"body": "multisearch"}}}
         self.es_connection.multi_search("neverEndIndex", source=source)
 
-        self.assertListEqual(['{"_index": "teste"}\n{"query": {"text": {"_id": "171171"}}}',
-                              '{"_index": "neverEndIndex"}\n{"query": {"text": {"body": "multisearch"}}}'
+        self.assertListEqual(['{"index": "teste"}\n{"query": {"text": {"_id": "171171"}}}',
+                              '{"index": "neverEndIndex"}\n{"query": {"text": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
     def test_deve_gerar_header_vazio_se_nao_existir_indice(self):
@@ -104,7 +104,7 @@ class TestESConnection(AsyncTestCase):
         resposta = escape.json_decode(response.body)
         assert response.code == 200, "response.code != 200 \n" + str(resposta)
         assert resposta['responses'][0]['hits']['hits'][0]['_id'] == "171171", resposta['responses'][0]['hits']['hits'][0]['_id']
-        assert resposta['responses'][1]['hits']['hits'][0]['_id'] == "101010", resposta['responses'][1]['hits']['hits'][0]['_id']
+        self.assertFalse("hits" in resposta['responses'][1])
         self.stop()
 
     def test_deve_fazer_duas_consultas(self):
