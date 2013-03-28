@@ -29,7 +29,7 @@ class TestESConnection(AsyncTestCase):
         resposta = escape.json_decode(response.body)
         assert response.code == 200, resposta
         assert resposta["hits"]["total"] == 1, resposta
-        assert resposta["hits"]["hits"][0]["_id"] == u'171171', resposta["hits"]["hits"][0]["_id"]+'\n'+str(resposta)
+        assert resposta["hits"]["hits"][0]["_id"] == u'171171', resposta["hits"]["hits"][0]["_id"] + '\n' + str(resposta)
         self.stop()
 
     def test_consulta_simples(self):
@@ -38,8 +38,8 @@ class TestESConnection(AsyncTestCase):
 
     def test_consulta_especificando_tipo_campo(self):
         self.es_connection.search(callback=self.tratar_resposta_consulta_especificando_tipo_campo,
-            source={"query": {"text" : {"ID" : "171171"}}},
-            type="materia", index="teste")
+                                  source={"query": {"text": {"ID": "171171"}}},
+                                  type="materia", index="teste")
         self.wait()
 
     def verificar_quantidade_de_registros(self, response):
@@ -81,9 +81,9 @@ class TestESConnection(AsyncTestCase):
         self.wait()
 
     def test_deve_acumular_buscas_para_posteriormente_serem_executadas_com_multisearch(self):
-        source = {"query": {"text" : {"_id" : "171171"}}}
+        source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search("teste", source=source)
-        source = {"query": {"text" : {"body" : "multisearch"}}}
+        source = {"query": {"text": {"body": "multisearch"}}}
         self.es_connection.multi_search("neverEndIndex", source=source)
 
         self.assertListEqual(['{"_index": "teste"}\n{"query": {"text": {"_id": "171171"}}}',
@@ -91,9 +91,9 @@ class TestESConnection(AsyncTestCase):
                               ], self.es_connection.bulk.bulk_list)
 
     def test_deve_gerar_header_vazio_se_nao_existir_indice(self):
-        source = {"query": {"text" : {"_id" : "171171"}}}
+        source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search(index=None, source=source)
-        source = {"query": {"text" : {"body" : "multisearch"}}}
+        source = {"query": {"text": {"body": "multisearch"}}}
         self.es_connection.multi_search(index=None, source=source)
 
         self.assertListEqual(['{}\n{"query": {"text": {"_id": "171171"}}}',
@@ -108,22 +108,20 @@ class TestESConnection(AsyncTestCase):
         self.stop()
 
     def test_deve_fazer_duas_consultas(self):
-        source = {"query": {"text" : {"_id" : "171171"}}}
+        source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search(index="teste", source=source)
-        source = {"query": {"text" : {"_id" : "101010"}}}
+        source = {"query": {"text": {"_id": "101010"}}}
         self.es_connection.multi_search(index="neverEndIndex", source=source)
 
         self.es_connection.apply_search(callback=self.verificar_resposta_do_multisearch)
         self.wait()
 
     def test_deve_limpar_a_lista_de_consultas_apos_o_apply_search(self):
-        source = {"query": {"text" : {"_id" : "171171"}}}
+        source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search(index="teste", source=source)
-        source = {"query": {"text" : {"_id" : "101010"}}}
+        source = {"query": {"text": {"_id": "101010"}}}
         self.es_connection.multi_search(index="neverEndIndex", source=source)
 
         self.es_connection.apply_search(callback=self.verificar_resposta_do_multisearch)
         self.wait()
         self.assertListEqual([], self.es_connection.bulk.bulk_list)
-
-    
