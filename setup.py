@@ -19,7 +19,7 @@ Conexão assíncrona com o elasticsearch. Para ser utilizado com o Tornado Serve
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          'tornado',
+          'tornado==2.4',
       ],
       tests_require=[
             'unittest2',
