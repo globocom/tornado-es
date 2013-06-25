@@ -19,10 +19,10 @@ class TestESConnection(AsyncTestCase):
         super(AsyncTestCase, self).tearDown()
 
     def test_simple_search(self):
-        self.es_connection.get_by_path("/_search?q=_id:http\:\/\/g1.be.globoi.com\/noticia\/2\/fast", self.stop)
+        self.es_connection.get_by_path("/_search?q=_id:http\:\/\/localhost\/noticia\/2\/fast", self.stop)
         response = self._verify_status_code_and_return_response()
         self.assertEqual(response["hits"]["total"], 1)
-        self.assertEqual(response["hits"]["hits"][0]["_id"], u'http://g1.be.globoi.com/noticia/2/fast')
+        self.assertEqual(response["hits"]["hits"][0]["_id"], u'http://localhost/noticia/2/fast')
 
     def test_search_for_specific_type_with_query(self):
         self.es_connection.search(callback=self.stop,
