@@ -1,0 +1,4 @@
+-r requirements.txt
+
+unittest2
+nose
