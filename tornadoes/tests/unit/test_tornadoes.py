@@ -11,7 +11,7 @@ class TestESConnection(AsyncTestCase):
 
     def setUp(self):
         self.io_loop = self.get_new_ioloop()
-        self.es_connection = ESConnection("localhost", "1980", self.io_loop)
+        self.es_connection = ESConnection("localhost", "9200", self.io_loop)
 
     def tearDown(self):
         if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):

@@ -2,13 +2,13 @@
 
 test () {
     bulk
-    python run_tests.py
+    nosetests tornadoes/tests
 }
 
 bulk () {
-    curl -XDELETE 'http://localhost:1980/_all'; echo
-    curl -s -XPOST 'http://localhost:1980/_bulk?refresh=true' --data-binary @tornadoes/tests/data/materias.bulk; echo
-    curl -s -XPOST 'http://localhost:1980/_bulk?refresh=true' --data-binary @tornadoes/tests/data/outrasmaterias.bulk; echo
+    curl -XDELETE 'http://localhost:9200/_all'; echo
+    curl -s -XPOST 'http://localhost:9200/_bulk?refresh=true' --data-binary @tornadoes/tests/data/materias.bulk; echo
+    curl -s -XPOST 'http://localhost:9200/_bulk?refresh=true' --data-binary @tornadoes/tests/data/outrasmaterias.bulk; echo
 }
 
 if [ $1 ]; then

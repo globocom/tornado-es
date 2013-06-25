@@ -3,7 +3,7 @@ python:
   - "2.7"
 install: "pip install -r test-requirements.txt --use-mirrors"
 # command to run tests
-script: python setup.py install && nosetests tornadoes/tests
+script: python setup.py install && ./run test
 
 branches:
   only:
