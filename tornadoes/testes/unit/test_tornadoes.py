@@ -18,69 +18,43 @@ class TestESConnection(AsyncTestCase):
             self.io_loop.close(all_fds=True)
         super(AsyncTestCase, self).tearDown()
 
-    def tratar_resposta_consulta_simples(self, response):
-        assert response.code == 200
-        resposta = escape.json_decode(response.body)
-        assert resposta["hits"]["total"] == 1
-        assert resposta["hits"]["hits"][0]["_id"] == u'http://g1.be.globoi.com/noticia/2/fast'
-        self.stop()
+    def test_simple_search(self):
+        self.es_connection.get_by_path("/_search?q=_id:http\:\/\/g1.be.globoi.com\/noticia\/2\/fast", self.stop)
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["hits"]["total"], 1)
+        self.assertEqual(response["hits"]["hits"][0]["_id"], u'http://g1.be.globoi.com/noticia/2/fast')
 
-    def tratar_resposta_consulta_especificando_tipo_campo(self, response):
-        resposta = escape.json_decode(response.body)
-        assert response.code == 200, resposta
-        assert resposta["hits"]["total"] == 1, resposta
-        assert resposta["hits"]["hits"][0]["_id"] == u'171171', resposta["hits"]["hits"][0]["_id"] + '\n' + str(resposta)
-        self.stop()
-
-    def test_consulta_simples(self):
-        self.es_connection.get_by_path("/_search?q=_id:http\:\/\/g1.be.globoi.com\/noticia\/2\/fast", self.tratar_resposta_consulta_simples)
-        self.wait()
-
-    def test_consulta_especificando_tipo_campo(self):
-        self.es_connection.search(callback=self.tratar_resposta_consulta_especificando_tipo_campo,
+    def test_search_for_specific_type_with_query(self):
+        self.es_connection.search(callback=self.stop,
                                   source={"query": {"text": {"ID": "171171"}}},
                                   type="materia", index="teste")
-        self.wait()
 
-    def verificar_quantidade_de_registros(self, response):
-        resposta = escape.json_decode(response.body)
-        assert response.code == 200, "response.code != 200\n" + str(resposta)
-        assert resposta["hits"]["total"] == 28
-        self.stop()
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["hits"]["total"], 1)
+        self.assertEqual(response["hits"]["hits"][0]["_id"], u'171171')
 
-    def test_consulta_todos_os_registros(self):
-        self.es_connection.search(self.verificar_quantidade_de_registros)
-        self.wait()
+    def test_search_all_entries(self):
+        self.es_connection.search(self.stop)
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["hits"]["total"], 28)
 
-    def verificar_busca_indice_especifico(self, response):
-        resposta = escape.json_decode(response.body)
-        assert response.code == 200, "response.code != 200\n" + resposta
-        assert resposta["hits"]["total"] == 14
-        self.stop()
+    def test_search_specific_index(self):
+        self.es_connection.search(callback=self.stop, index="outroteste")
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["hits"]["total"], 14)
 
-    def test_busca_indice_especifico(self):
-        self.es_connection.search(callback=self.verificar_busca_indice_especifico, index="outroteste")
-        self.wait()
+    def test_search_apecific_type(self):
+        self.es_connection.search(self.stop, type='galeria')
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["hits"]["total"], 2)
 
-    def verificar_busca_tipo_especifico(self, response):
-        resposta = escape.json_decode(response.body)
-        assert response.code == 200, "response.code != 200\n" + str(resposta)
-        assert resposta["hits"]["total"] == 2
-        self.stop()
+    def test_should_access_specific_documento(self):
+        self.es_connection.get(index="teste", type="materia", uid="171171", callback=self.stop)
+        response = self.wait()
+        self.assertEqual(response['Portal'], "G1")
+        self.assertEqual(response['Macrotema'], "Noticias")
 
-    def test_busca_tipo_especifico(self):
-        self.es_connection.search(self.verificar_busca_tipo_especifico, type='galeria')
-        self.wait()
-
-    def test_deve_acessar_um_documento_especifico(self):
-        def callback(data):
-            self.assertEqual(data['Portal'], "G1")
-            self.assertEqual(data['Macrotema'], "Noticias")
-            self.stop()
-        self.es_connection.get(index="teste", type="materia", uid="171171", callback=callback)
-        self.wait()
-
-    def test_deve_acumular_buscas_para_posteriormente_serem_executadas_com_multisearch(self):
+    def test_should_accumulate_searches_before_search(self):
         source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search("teste", source=source)
         source = {"query": {"text": {"body": "multisearch"}}}
@@ -90,7 +64,7 @@ class TestESConnection(AsyncTestCase):
                               '{"index": "neverEndIndex"}\n{"query": {"text": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
-    def test_deve_gerar_header_vazio_se_nao_existir_indice(self):
+    def test_should_generate_empty_header_with_no_index_specified(self):
         source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search(index=None, source=source)
         source = {"query": {"text": {"body": "multisearch"}}}
@@ -100,28 +74,27 @@ class TestESConnection(AsyncTestCase):
                               '{}\n{"query": {"text": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
-    def verificar_resposta_do_multisearch(self, response):
-        resposta = escape.json_decode(response.body)
-        assert response.code == 200, "response.code != 200 \n" + str(resposta)
-        assert resposta['responses'][0]['hits']['hits'][0]['_id'] == "171171", resposta['responses'][0]['hits']['hits'][0]['_id']
-        self.assertFalse("hits" in resposta['responses'][1])
-        self.stop()
+    def test_should_make_two_searches(self):
+        self._make_multisearch()
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response['responses'][0]['hits']['hits'][0]['_id'], "171171")
+        self.assertFalse("hits" in response['responses'][1])
 
-    def test_deve_fazer_duas_consultas(self):
-        source = {"query": {"text": {"_id": "171171"}}}
-        self.es_connection.multi_search(index="teste", source=source)
-        source = {"query": {"text": {"_id": "101010"}}}
-        self.es_connection.multi_search(index="neverEndIndex", source=source)
-
-        self.es_connection.apply_search(callback=self.verificar_resposta_do_multisearch)
-        self.wait()
-
-    def test_deve_limpar_a_lista_de_consultas_apos_o_apply_search(self):
-        source = {"query": {"text": {"_id": "171171"}}}
-        self.es_connection.multi_search(index="teste", source=source)
-        source = {"query": {"text": {"_id": "101010"}}}
-        self.es_connection.multi_search(index="neverEndIndex", source=source)
-
-        self.es_connection.apply_search(callback=self.verificar_resposta_do_multisearch)
+    def test_should_clean_search_list_after_search(self):
+        self._make_multisearch()
         self.wait()
         self.assertListEqual([], self.es_connection.bulk.bulk_list)
+
+    def _make_multisearch(self):
+        source = {"query": {"text": {"_id": "171171"}}}
+        self.es_connection.multi_search(index="teste", source=source)
+        source = {"query": {"text": {"_id": "101010"}}}
+        self.es_connection.multi_search(index="neverEndIndex", source=source)
+
+        self.es_connection.apply_search(callback=self.stop)
+
+    def _verify_status_code_and_return_response(self):
+        response = self.wait()
+        self.assertEqual(response.code, 200, "Wrong response code.")
+        response = escape.json_decode(response.body)
+        return response

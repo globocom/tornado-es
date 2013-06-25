@@ -7,14 +7,14 @@ VERSION = '1.3.2'
 setup(
       name='tornadoes',
       version=VERSION,
-      description="Conexão assíncrona com o elasticsearch.",
+      description="A tornado-powered python library that provides asynchronous access to elasticsearch.",
       long_description="""\
-Conexão assíncrona com o elasticsearch. Para ser utilizado com o Tornado Server.""",
-      author='Time de busca da globo.com',
+A tornado-powered python library that provides asynchronous access to elasticsearch.""",
+      author='Team Search of globo.com',
       author_email='busca@corp.globo.com',
       url = 'http://github.com/globocom/tornado-es',
       download_url = 'http://github.com/globocom/tornado-es',
-      license='Proprietary',
+      license='MIT',
       packages=find_packages(exclude=['ez_setup', 'testes']),
       include_package_data=True,
       zip_safe=True,

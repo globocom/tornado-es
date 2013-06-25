@@ -13,8 +13,7 @@ class ESConnection(object):
 
     def __init__(self, host='localhost', port='9200', io_loop=None):
         self.io_loop = io_loop or IOLoop.instance()
-        self.host = host
-        self.port = port
+        self.url = "http://%(host)s:%(port)s" % {"host": host, "port": port}
         self.bulk = BulkList()
         self.client = AsyncHTTPClient(self.io_loop)
 
@@ -52,12 +51,12 @@ class ESConnection(object):
         self.post_by_path(path, callback, source=source)
 
     def post_by_path(self, path, callback, source):
-        url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
+        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
         request_http = HTTPRequest(url, method="POST", body=source)
         self.client.fetch(request=request_http, callback=callback)
 
     def get_by_path(self, path, callback):
-        url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
+        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
         self.client.fetch(url, callback)
 
     def get(self, index, type, uid, callback):
@@ -65,5 +64,5 @@ class ESConnection(object):
             source = json.loads(response.body).get('_source', {})
             callback(source)
         path = '/{index}/{type}/{uid}'.format(**locals())
-        url = 'http://%(host)s:%(porta)s%(path)s' % {"host": self.host, "porta": self.port, "path": path}
+        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
         self.client.fetch(url, to_dict_callback)

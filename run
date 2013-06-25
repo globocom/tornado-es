@@ -1,11 +1,5 @@
 #!/bin/bash
 
-VERSION="1.0.0"
-
-kill_it () {
-    (ps aux | egrep "$1" | egrep -v grep | awk '{ print $2 }' | xargs kill -9 &> /dev/null)
-}
-
 test () {
     bulk
     python run_tests.py
@@ -20,7 +14,7 @@ bulk () {
 if [ $1 ]; then
     $1;
 else
-    echo  "   bulk - adiciona no ES o bulk buscaes/data/materias.bulk" 
-    echo  "   test - roda os testes"
+    echo  "   bulk - Insert test data into elasticsearch."
+    echo  "   test - Run the tests."
     exit 1
 fi;
