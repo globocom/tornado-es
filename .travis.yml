@@ -8,7 +8,6 @@ script: python setup.py install && ./run test
 branches:
   only:
     - master
-    - develop
 
 services:
   - elasticsearch
