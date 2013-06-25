@@ -2,7 +2,7 @@
 
 import unittest2
 
-test_path = "tornadoes/testes/"
+test_path = "tornadoes/tests/"
 
 def main():
     suite = unittest2.loader.TestLoader().discover(test_path)
