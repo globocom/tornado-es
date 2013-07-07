@@ -1,28 +1,29 @@
-# -*- coding: utf-8 -*-  
+# -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
 
 VERSION = '1.3.2'
 
 setup(
-      name='tornadoes',
-      version=VERSION,
-      description="A tornado-powered python library that provides asynchronous access to elasticsearch.",
-      long_description="""\
-A tornado-powered python library that provides asynchronous access to elasticsearch.""",
-      author='Team Search of globo.com',
-      author_email='busca@corp.globo.com',
-      url = 'http://github.com/globocom/tornado-es',
-      download_url = 'http://github.com/globocom/tornado-es',
-      license='MIT',
-      packages=find_packages(exclude=['ez_setup', 'testes']),
-      include_package_data=True,
-      zip_safe=True,
-      install_requires=[
-          'tornado==2.4',
-      ],
-      tests_require=[
-            'unittest2',
-        ],
-      dependency_links=[],
+    name='tornadoes',
+    version=VERSION,
+    description="A tornado-powered python library that provides asynchronous access to elasticsearch.",
+    long_description="""\
+    A tornado-powered python library that provides asynchronous access to elasticsearch.""",
+    author='Team Search of globo.com',
+    author_email='busca@corp.globo.com',
+    url='http://github.com/globocom/tornado-es',
+    download_url='http://github.com/globocom/tornado-es',
+    license='MIT',
+    packages=find_packages(exclude=['ez_setup', 'testes']),
+    include_package_data=True,
+    zip_safe=True,
+    install_requires=[
+        'tornado>=2.4,<3.2.0',
+    ],
+    tests_require=[
+        'unittest2',
+        'nose'
+    ],
+    dependency_links=[],
 )
