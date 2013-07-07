@@ -68,20 +68,23 @@ class ESConnection(object):
         def to_dict_callback(response):
             source = json.loads(response.body).get('_source', {})
             callback(source)
-        path = '/{index}/{type}/{uid}'.format(**locals())
-        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        self.client.fetch(url, to_dict_callback)
+        self.request_document(index, type, uid, callback=to_dict_callback)
 
     @return_future
     def put(self, index, type, uid, contents, callback):
-        path = '/{index}/{type}/{uid}'.format(**locals())
-        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        request = HTTPRequest(url, method="PUT", body=json.dumps(contents))
-        self.client.fetch(request, callback)
+        self.request_document(index, type, uid, "PUT", body=json.dumps(contents), callback=callback)
 
     @return_future
     def delete(self, index, type, uid, callback):
+        self.request_document(index, type, uid, "DELETE", callback=callback)
+
+    def request_document(self, index, type, uid, method="GET", body=None, callback=None):
         path = '/{index}/{type}/{uid}'.format(**locals())
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        request = HTTPRequest(url, method="DELETE")
+        request_arguments = dict(method=method)
+
+        if body is not None:
+            request_arguments['body'] = body
+
+        request = HTTPRequest(url, **request_arguments)
         self.client.fetch(request, callback)
