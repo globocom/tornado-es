@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from tornadoes import ESConnection
+from uuid import uuid4
 
+from tornadoes import ESConnection
 from tornado import escape
 from tornado.testing import AsyncTestCase, gen_test
 from tornado.ioloop import IOLoop
@@ -95,9 +96,33 @@ class TestESConnection(AsyncTestCase):
 
     def _verify_status_code_and_return_response(self):
         response = self.wait()
-        self.assertEqual(response.code, 200, "Wrong response code.")
+        self.assertTrue(response.code in [200, 201], "Wrong response code: %d." % response.code)
         response = escape.json_decode(response.body)
         return response
+
+    def test_can_put_and_delete_document(self):
+        try:
+            doc_id = str(uuid4())
+
+            self.es_connection.put("test", "document", doc_id, {
+                "test": "document",
+                "other": "property"
+            }, self.stop)
+
+            response = self._verify_status_code_and_return_response()
+            self.assertEqual(response['_index'], 'test')
+            self.assertEqual(response['_type'], 'document')
+            self.assertTrue(response['ok'])
+            self.assertEqual(response['_id'], doc_id)
+        finally:
+            self.es_connection.delete("test", "document", doc_id, callback=self.stop)
+            response = self._verify_status_code_and_return_response()
+
+            self.assertTrue(response['found'])
+            self.assertTrue(response['ok'])
+            self.assertEqual(response['_index'], 'test')
+            self.assertEqual(response['_type'], 'document')
+            self.assertEqual(response['_id'], doc_id)
 
 
 class TestESConnectionWithTornadoGen(AsyncTestCase):
@@ -172,6 +197,31 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
 
         self.assertListEqual([], self.es_connection.bulk.bulk_list)
 
+    @gen_test
+    def test_can_put_and_delete_document(self):
+        try:
+            doc_id = str(uuid4())
+
+            response = yield self.es_connection.put("test", "document", doc_id, {
+                "test": "document",
+                "other": "property"
+            })
+
+            response = self._verify_status_code_and_return_response(response)
+            self.assertEqual(response['_index'], 'test')
+            self.assertEqual(response['_type'], 'document')
+            self.assertTrue(response['ok'])
+            self.assertEqual(response['_id'], doc_id)
+        finally:
+            response = yield self.es_connection.delete("test", "document", doc_id)
+            response = self._verify_status_code_and_return_response(response)
+
+            self.assertTrue(response['found'])
+            self.assertTrue(response['ok'])
+            self.assertEqual(response['_index'], 'test')
+            self.assertEqual(response['_type'], 'document')
+            self.assertEqual(response['_id'], doc_id)
+
     def _make_multisearch(self):
         source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search(index="teste", source=source)
@@ -179,6 +229,6 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
         self.es_connection.multi_search(index="neverEndIndex", source=source)
 
     def _verify_status_code_and_return_response(self, response):
-        self.assertEqual(response.code, 200, "Wrong response code.")
+        self.assertTrue(response.code in [200, 201], "Wrong response code: %d." % response.code)
         response = escape.json_decode(response.body)
         return response

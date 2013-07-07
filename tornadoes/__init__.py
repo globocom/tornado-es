@@ -71,3 +71,17 @@ class ESConnection(object):
         path = '/{index}/{type}/{uid}'.format(**locals())
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
         self.client.fetch(url, to_dict_callback)
+
+    @return_future
+    def put(self, index, type, uid, contents, callback):
+        path = '/{index}/{type}/{uid}'.format(**locals())
+        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
+        request = HTTPRequest(url, method="PUT", body=json.dumps(contents))
+        self.client.fetch(request, callback)
+
+    @return_future
+    def delete(self, index, type, uid, callback):
+        path = '/{index}/{type}/{uid}'.format(**locals())
+        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
+        request = HTTPRequest(url, method="DELETE")
+        self.client.fetch(request, callback)
