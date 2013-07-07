@@ -19,7 +19,7 @@ setup(
     include_package_data=True,
     zip_safe=True,
     install_requires=[
-        'tornado>=2.4,<3.2.0',
+        'tornado>=3.0.0,<3.2.0',
     ],
     tests_require=[
         'unittest2',

@@ -7,6 +7,7 @@ from models import BulkList
 from urllib import urlencode
 from tornado.ioloop import IOLoop
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+from tornado.concurrent import return_future
 
 
 class ESConnection(object):
@@ -37,6 +38,7 @@ class ESConnection(object):
         }
         return path
 
+    @return_future
     def search(self, callback, **kwargs):
         path = self.create_path("search", **kwargs)
         source = json.dumps(kwargs.get('source', {"query": {"query_string": {"query": "*"}}}))
@@ -45,6 +47,7 @@ class ESConnection(object):
     def multi_search(self, index, source):
         self.bulk.add(index, source)
 
+    @return_future
     def apply_search(self, callback):
         path = "/_msearch"
         source = self.bulk.prepare_search()
@@ -55,10 +58,12 @@ class ESConnection(object):
         request_http = HTTPRequest(url, method="POST", body=source)
         self.client.fetch(request=request_http, callback=callback)
 
+    @return_future
     def get_by_path(self, path, callback):
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
         self.client.fetch(url, callback)
 
+    @return_future
     def get(self, index, type, uid, callback):
         def to_dict_callback(response):
             source = json.loads(response.body).get('_source', {})

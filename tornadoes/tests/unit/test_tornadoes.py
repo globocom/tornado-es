@@ -3,7 +3,7 @@
 from tornadoes import ESConnection
 
 from tornado import escape
-from tornado.testing import AsyncTestCase
+from tornado.testing import AsyncTestCase, gen_test
 from tornado.ioloop import IOLoop
 
 
@@ -95,6 +95,90 @@ class TestESConnection(AsyncTestCase):
 
     def _verify_status_code_and_return_response(self):
         response = self.wait()
+        self.assertEqual(response.code, 200, "Wrong response code.")
+        response = escape.json_decode(response.body)
+        return response
+
+
+class TestESConnectionWithTornadoGen(AsyncTestCase):
+
+    def setUp(self):
+        self.io_loop = self.get_new_ioloop()
+        self.es_connection = ESConnection("localhost", "9200", self.io_loop)
+
+    def tearDown(self):
+        if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):
+            self.io_loop.close(all_fds=True)
+        super(AsyncTestCase, self).tearDown()
+
+    @gen_test
+    def test_simple_search(self):
+        response = yield self.es_connection.get_by_path("/_search?q=_id:http\:\/\/localhost\/noticia\/2\/fast", self.stop)
+
+        response = self._verify_status_code_and_return_response(response)
+
+        self.assertEqual(response["hits"]["total"], 1)
+        self.assertEqual(response["hits"]["hits"][0]["_id"], u'http://localhost/noticia/2/fast')
+
+    @gen_test
+    def test_search_for_specific_type_with_query(self):
+        response = yield self.es_connection.search(
+            source={"query": {"text": {"ID": "171171"}}},
+            type="materia", index="teste"
+        )
+
+        response = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response["hits"]["total"], 1)
+        self.assertEqual(response["hits"]["hits"][0]["_id"], u'171171')
+
+    @gen_test
+    def test_search_all_entries(self):
+        response = yield self.es_connection.search()
+        response = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response["hits"]["total"], 28)
+
+    @gen_test
+    def test_search_specific_index(self):
+        response = yield self.es_connection.search(index="outroteste")
+        response = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response["hits"]["total"], 14)
+
+    @gen_test
+    def test_search_apecific_type(self):
+        response = yield self.es_connection.search(type='galeria')
+        response = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response["hits"]["total"], 2)
+
+    @gen_test
+    def test_should_access_specific_documento(self):
+        response = yield self.es_connection.get(index="teste", type="materia", uid="171171")
+        self.assertEqual(response['Portal'], "G1")
+        self.assertEqual(response['Macrotema'], "Noticias")
+
+    @gen_test
+    def test_should_make_two_searches(self):
+        self._make_multisearch()
+        response = yield self.es_connection.apply_search()
+        response = self._verify_status_code_and_return_response(response)
+
+        self.assertEqual(response['responses'][0]['hits']['hits'][0]['_id'], "171171")
+        self.assertFalse("hits" in response['responses'][1])
+
+    @gen_test
+    def test_should_clean_search_list_after_search(self):
+        self._make_multisearch()
+        response = yield self.es_connection.apply_search()
+        response = self._verify_status_code_and_return_response(response)
+
+        self.assertListEqual([], self.es_connection.bulk.bulk_list)
+
+    def _make_multisearch(self):
+        source = {"query": {"text": {"_id": "171171"}}}
+        self.es_connection.multi_search(index="teste", source=source)
+        source = {"query": {"text": {"_id": "101010"}}}
+        self.es_connection.multi_search(index="neverEndIndex", source=source)
+
+    def _verify_status_code_and_return_response(self, response):
         self.assertEqual(response.code, 200, "Wrong response code.")
         response = escape.json_decode(response.body)
         return response
