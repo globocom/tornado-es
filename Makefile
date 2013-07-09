@@ -1,7 +1,7 @@
 all: help
 
 help:
-	@echo "Uso: make test -- Executa os testes."
+	@echo "Usage: make test -- Runs tests."
 
 clean:
 	@echo "Cleaning up build and *.pyc files..."
@@ -11,6 +11,10 @@ clean:
 	@rm -rf ./dist
 	@rm -rf ./MANIFEST
 	@echo "Done!"
+
+bulk:
+	# creates test data
+	@./run bulk
 
 test: clean
 	@python run_tests.py
