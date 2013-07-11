@@ -45,7 +45,7 @@ Tornado program used to search the document previously indexed:
             self.es_connection.search(callback=self.callback,
                                       index=indice,
                                       type=tipo,
-                                      source=json.dumps(query))
+                                      source=query)
 
         def callback(self, response):
             self.content_type = 'application/json'
