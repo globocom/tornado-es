@@ -2,7 +2,7 @@
 
 test () {
     bulk
-    nosetests tornadoes/tests
+    nosetests tornadoes/tests -s
 }
 
 bulk () {
