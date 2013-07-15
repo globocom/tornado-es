@@ -107,7 +107,7 @@ class TestESConnection(AsyncTestCase):
             self.es_connection.put("test", "document", doc_id, {
                 "test": "document",
                 "other": "property"
-            }, self.stop)
+            }, parameters={'request': True}, callback=self.stop)
 
             response = self._verify_status_code_and_return_response()
             self.assertEqual(response['_index'], 'test')

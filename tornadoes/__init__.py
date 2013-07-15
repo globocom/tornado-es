@@ -71,16 +71,22 @@ class ESConnection(object):
         self.request_document(index, type, uid, callback=to_dict_callback)
 
     @return_future
-    def put(self, index, type, uid, contents, callback):
-        self.request_document(index, type, uid, "PUT", body=json.dumps(contents), callback=callback)
+    def put(self, index, type, uid, contents, parameters=None, callback=None):
+        self.request_document(
+            index, type, uid, "PUT", body=json.dumps(contents),
+            parameters=parameters, callback=callback)
 
     @return_future
     def delete(self, index, type, uid, callback):
         self.request_document(index, type, uid, "DELETE", callback=callback)
 
-    def request_document(self, index, type, uid, method="GET", body=None, callback=None):
+    def request_document(self, index, type, uid, method="GET", body=None, parameters=None, callback=None):
         path = '/{index}/{type}/{uid}'.format(**locals())
-        url = '%(url)s%(path)s' % {"url": self.url, "path": path}
+        url = '%(url)s%(path)s?%(querystring)s' % {
+            "url": self.url,
+            "path": path,
+            "querystring": urlencode(parameters or {})
+        }
         request_arguments = dict(method=method)
 
         if body is not None:
