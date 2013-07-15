@@ -3,6 +3,9 @@ all: help
 help:
 	@echo "Usage: make test -- Runs tests."
 
+setup:
+	pip install -r test-requirements.txt
+
 clean:
 	@echo "Cleaning up build and *.pyc files..."
 	@find . -name '*.pyc' -exec rm -rf {} \;
