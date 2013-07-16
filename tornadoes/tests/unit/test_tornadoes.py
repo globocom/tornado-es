@@ -96,6 +96,9 @@ class TestESConnection(AsyncTestCase):
 
     def _verify_status_code_and_return_response(self):
         response = self.wait()
+        return self._verify_response_and_returns_dict(response)
+
+    def _verify_response_and_returns_dict(self, response):
         self.assertTrue(response.code in [200, 201], "Wrong response code: %d." % response.code)
         response = escape.json_decode(response.body)
         return response
@@ -107,15 +110,18 @@ class TestESConnection(AsyncTestCase):
             self.es_connection.put("test", "document", doc_id, {
                 "test": "document",
                 "other": "property"
-            }, parameters={'request': True}, callback=self.stop)
+            }, parameters={'refresh': True}, callback=self.stop)
 
-            response = self._verify_status_code_and_return_response()
-            self.assertEqual(response['_index'], 'test')
-            self.assertEqual(response['_type'], 'document')
-            self.assertTrue(response['ok'])
-            self.assertEqual(response['_id'], doc_id)
+            response = self.wait()
+            response_dict = self._verify_response_and_returns_dict(response)
+            self.assertEqual(response_dict['_index'], 'test')
+            self.assertEqual(response_dict['_type'], 'document')
+            self.assertTrue(response_dict['ok'])
+            self.assertEqual(response_dict['_id'], doc_id)
+            self.assertIn('refresh=True', response.request.url)
         finally:
-            self.es_connection.delete("test", "document", doc_id, callback=self.stop)
+            self.es_connection.delete("test", "document", doc_id,
+                parameters={'refresh': True}, callback=self.stop)
             response = self._verify_status_code_and_return_response()
 
             self.assertTrue(response['found'])
@@ -205,15 +211,17 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
             response = yield self.es_connection.put("test", "document", doc_id, {
                 "test": "document",
                 "other": "property"
-            })
+            }, parameters={'refresh': True})
 
-            response = self._verify_status_code_and_return_response(response)
-            self.assertEqual(response['_index'], 'test')
-            self.assertEqual(response['_type'], 'document')
-            self.assertTrue(response['ok'])
-            self.assertEqual(response['_id'], doc_id)
+            response_dict = self._verify_status_code_and_return_response(response)
+            self.assertEqual(response_dict['_index'], 'test')
+            self.assertEqual(response_dict['_type'], 'document')
+            self.assertTrue(response_dict['ok'])
+            self.assertEqual(response_dict['_id'], doc_id)
+            self.assertIn('refresh=True', response.request.url)
         finally:
-            response = yield self.es_connection.delete("test", "document", doc_id)
+            response = yield self.es_connection.delete("test", "document", doc_id,
+                parameters={'refresh': True})
             response = self._verify_status_code_and_return_response(response)
 
             self.assertTrue(response['found'])

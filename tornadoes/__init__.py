@@ -77,8 +77,8 @@ class ESConnection(object):
             parameters=parameters, callback=callback)
 
     @return_future
-    def delete(self, index, type, uid, callback):
-        self.request_document(index, type, uid, "DELETE", callback=callback)
+    def delete(self, index, type, uid, parameters=None, callback=None):
+        self.request_document(index, type, uid, "DELETE", parameters=parameters, callback=callback)
 
     def request_document(self, index, type, uid, method="GET", body=None, parameters=None, callback=None):
         path = '/{index}/{type}/{uid}'.format(**locals())
