@@ -80,6 +80,23 @@ class ESConnection(object):
     def delete(self, index, type, uid, parameters=None, callback=None):
         self.request_document(index, type, uid, "DELETE", parameters=parameters, callback=callback)
 
+    @return_future
+    def count(self, index="_all", type=None, source='', parameters=None, callback=None):
+        path = '/{}'.format(index)
+
+        if type:
+            path += '/{}'.format(type)
+
+        path += '/_count'
+
+        if parameters:
+            path += '?{}'.format(parameters)
+
+        if source:
+            source = json.dumps(source['query'])
+
+        self.post_by_path(path=path, callback=callback, source=source)
+
     def request_document(self, index, type, uid, method="GET", body=None, parameters=None, callback=None):
         path = '/{index}/{type}/{uid}'.format(**locals())
         url = '%(url)s%(path)s?%(querystring)s' % {

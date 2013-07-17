@@ -130,6 +130,27 @@ class TestESConnection(AsyncTestCase):
             self.assertEqual(response['_type'], 'document')
             self.assertEqual(response['_id'], doc_id)
 
+    def test_count_all_entries(self):
+        self.es_connection.count(callback=self.stop)
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["count"], 28)
+
+    def test_count_specific_index(self):
+        self.es_connection.count(callback=self.stop, index="outroteste")
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["count"], 14)
+
+    def test_count_specific_type(self):
+        self.es_connection.count(callback=self.stop, type='galeria')
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["count"], 2)
+
+    def test_count_specific_query(self):
+        source = {"query": {"text": {"_id": "171171"}}}
+        self.es_connection.count(callback=self.stop, source=source)
+        response = self._verify_status_code_and_return_response()
+        self.assertEqual(response["count"], 1)
+
 
 class TestESConnectionWithTornadoGen(AsyncTestCase):
 
