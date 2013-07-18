@@ -251,6 +251,31 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
             self.assertEqual(response['_type'], 'document')
             self.assertEqual(response['_id'], doc_id)
 
+    @gen_test
+    def test_count_all_entries(self):
+        response = yield self.es_connection.count()
+        response_dict = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response_dict["count"], 28)
+
+    @gen_test
+    def test_count_specific_index(self):
+        response = yield self.es_connection.count(index="outroteste")
+        response_dict = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response_dict["count"], 14)
+
+    @gen_test
+    def test_count_specific_type(self):
+        response = yield self.es_connection.count(type='galeria')
+        response_dict = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response_dict["count"], 2)
+
+    @gen_test
+    def test_count_specific_query(self):
+        source = {"query": {"text": {"_id": "171171"}}}
+        response = yield self.es_connection.count(source=source)
+        response_dict = self._verify_status_code_and_return_response(response)
+        self.assertEqual(response_dict["count"], 1)
+
     def _make_multisearch(self):
         source = {"query": {"text": {"_id": "171171"}}}
         self.es_connection.multi_search(index="teste", source=source)
