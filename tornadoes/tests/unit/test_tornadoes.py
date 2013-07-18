@@ -160,6 +160,15 @@ class TestESConnection(AsyncTestCase):
         self.assertEqual(response_dict["count"], 1)
         self.assertTrue(response.request.url.endswith('_count?refresh=True'))
 
+    def test_count_specific_query_with_many_parameters(self):
+        source = {"query": {"text": {"_id": "171171"}}}
+        parameters = {'df': '_id', 'test': True}
+        self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
+        response = self.wait()
+        response_dict = self._verify_response_and_returns_dict(response)
+        self.assertEqual(response_dict["count"], 1)
+        self.assertTrue(response.request.url.endswith('_count?df=_id&test=True'))
+
 
 class TestESConnectionWithTornadoGen(AsyncTestCase):
 
@@ -288,6 +297,14 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
         self.assertTrue(response.request.url.endswith('_count?refresh=True'))
+
+    @gen_test
+    def test_count_specific_query_with_many_parameters(self):
+        source = {"query": {"text": {"_id": "171171"}}}
+        parameters = {'df': '_id', 'test': True}
+        response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
+        self.assertCount(response, 1)
+        self.assertTrue(response.request.url.endswith('_count?df=_id&test=True'))
 
     def assertCount(self, response, count):
         response_dict = self._verify_status_code_and_return_response(response)
