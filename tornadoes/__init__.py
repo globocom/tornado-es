@@ -90,7 +90,7 @@ class ESConnection(object):
         path += '/_count'
 
         if parameters:
-            path += '?{}'.format(parameters)
+            path += '?{}'.format(urlencode(parameters or {}))
 
         if source:
             source = json.dumps(source['query'])
