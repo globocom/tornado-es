@@ -8,16 +8,21 @@ from tornado.testing import AsyncTestCase, gen_test
 from tornado.ioloop import IOLoop
 
 
-class TestESConnection(AsyncTestCase):
+class BaseTestCase(AsyncTestCase):
+
+    connection_class = ESConnection
 
     def setUp(self):
         self.io_loop = self.get_new_ioloop()
-        self.es_connection = ESConnection("localhost", "9200", self.io_loop)
+        self.es_connection = self.connection_class("localhost", "9200", self.io_loop)
 
     def tearDown(self):
         if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):
             self.io_loop.close(all_fds=True)
         super(AsyncTestCase, self).tearDown()
+
+
+class TestESConnection(BaseTestCase):
 
     def test_simple_search(self):
         self.es_connection.get_by_path("/_search?q=_id:http\:\/\/localhost\/noticia\/2\/fast", self.stop)
@@ -170,16 +175,7 @@ class TestESConnection(AsyncTestCase):
         self.assertTrue(response.request.url.endswith('_count?df=_id&test=True'))
 
 
-class TestESConnectionWithTornadoGen(AsyncTestCase):
-
-    def setUp(self):
-        self.io_loop = self.get_new_ioloop()
-        self.es_connection = ESConnection("localhost", "9200", self.io_loop)
-
-    def tearDown(self):
-        if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):
-            self.io_loop.close(all_fds=True)
-        super(AsyncTestCase, self).tearDown()
+class TestESConnectionWithTornadoGen(BaseTestCase):
 
     @gen_test
     def test_simple_search(self):
@@ -320,3 +316,35 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
         self.assertTrue(response.code in [200, 201], "Wrong response code: %d." % response.code)
         response = escape.json_decode(response.body)
         return response
+
+
+class NoGzipConnection(ESConnection):
+    
+    def create_request(self, url, **kwargs):
+        kwargs['use_gzip'] = False
+        return super(NoGzipConnection, self).create_request(url, **kwargs)
+
+
+class CustomESConnection(BaseTestCase):
+
+    connection_class = NoGzipConnection
+
+    def test_should_allow_a_custom_request_with_get_by_path(self):
+        self.es_connection.get_by_path(
+            "/_search?q=_id:http\:\/\/localhost\/noticia\/2\/fast", self.stop)
+        self.assertResponseDisablesGzip()
+
+    def test_should_allow_a_custom_request_with_post_by_path(self):
+        self.es_connection.post_by_path(
+            "/_count", source='{}', callback=self.stop)
+        self.assertResponseDisablesGzip()
+
+    def test_should_allow_a_custom_request_with_request_document(self):
+        self.es_connection.request_document(
+            index="teste", type="materia", uid="171171", callback=self.stop)
+        self.assertResponseDisablesGzip()
+
+    def assertResponseDisablesGzip(self):
+        response = self.wait()
+        self.assertEqual(response.code, 200)
+        self.assertFalse(response.request.use_gzip)

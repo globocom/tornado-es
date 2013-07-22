@@ -55,13 +55,14 @@ class ESConnection(object):
 
     def post_by_path(self, path, callback, source):
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        request_http = HTTPRequest(url, method="POST", body=source)
+        request_http = self.create_request(url, method="POST", body=source)
         self.client.fetch(request=request_http, callback=callback)
 
     @return_future
     def get_by_path(self, path, callback):
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        self.client.fetch(url, callback)
+        request = self.create_request(url, method="GET")
+        self.client.fetch(request, callback)
 
     @return_future
     def get(self, index, type, uid, callback):
@@ -109,5 +110,8 @@ class ESConnection(object):
         if body is not None:
             request_arguments['body'] = body
 
-        request = HTTPRequest(url, **request_arguments)
+        request = self.create_request(url, **request_arguments)
         self.client.fetch(request, callback)
+
+    def create_request(self, url, **kwargs):
+        return HTTPRequest(url, **kwargs)
