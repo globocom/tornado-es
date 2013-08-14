@@ -21,21 +21,25 @@ class ESConnection(object):
     def create_path(self, method, **kwargs):
         index = kwargs.get('index', '_all')
         type_ = '/' + kwargs.get('type') if 'type' in kwargs else ''
-        size = kwargs.get('size', 10)
-        page = kwargs.get('page', 1)
-        from_ = (page - 1) * size
-        routing = kwargs.get('routing', '')
+        parameters = {}
+        for param in ['size', 'from', 'routing']:
+            value = kwargs.get(param, None)
+            if value:
+                parameters[param] = value
+        if 'page' in kwargs:
+            parameters.setdefault('size', 10)
+            parameters['from'] = (kwargs['page'] - 1) * parameters['size']
         jsonp_callback = kwargs.get('jsonp_callback', '')
-        parameters = {'from': from_, 'size': size}
-        if routing:
-            parameters["routing"] = routing
-        path = "/%(index)s%(type)s/_%(method)s?%(querystring)s%(jsonp_callback)s" % {
-            "querystring": urlencode(parameters),
+        if jsonp_callback:
+            parameters['callback'] = jsonp_callback
+        path = "/%(index)s%(type)s/_%(method)s" % {
             "method": method,
             "index": index,
-            "type": type_,
-            "jsonp_callback": "&callback=" + jsonp_callback if jsonp_callback else ""
+            "type": type_
         }
+        if parameters:
+            path += '?'+urlencode(parameters)
+
         return path
 
     @return_future
