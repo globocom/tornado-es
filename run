@@ -11,6 +11,10 @@ bulk () {
     curl -s -XPOST 'http://localhost:9200/_bulk?refresh=true' --data-binary @tornadoes/tests/data/outrasmaterias.bulk; echo
 }
 
+dist () {
+	python setup.py -q sdist upload -r pypi
+}
+
 if [ $1 ]; then
     $1;
 else
