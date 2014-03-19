@@ -38,7 +38,7 @@ class ESConnection(object):
             "type": type_
         }
         if parameters:
-            path += '?'+urlencode(parameters)
+            path += '?' + urlencode(parameters)
 
         return path
 
@@ -52,8 +52,10 @@ class ESConnection(object):
         self.bulk.add(index, source)
 
     @return_future
-    def apply_search(self, callback):
+    def apply_search(self, callback, params={}):
         path = "/_msearch"
+        if params:
+            path = "%s?%s" % (path, urlencode(params))
         source = self.bulk.prepare_search()
         self.post_by_path(path, callback, source=source)
 
