@@ -99,7 +99,7 @@ class ESConnection(object):
             path += '?{}'.format(urlencode(parameters or {}))
 
         if source:
-            source = json.dumps(source['query'])
+            source = json.dumps(source)
 
         self.post_by_path(path=path, callback=callback, source=source)
 

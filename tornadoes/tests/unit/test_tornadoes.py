@@ -27,17 +27,12 @@ class TestESConnection(AsyncTestCase):
 
     def test_search_for_specific_type_with_query(self):
         self.es_connection.search(callback=self.stop,
-                                  source={"query": {"text": {"ID": "171171"}}},
+                                  source={"query": {"term": {"ID": "171171"}}},
                                   type="materia", index="teste")
 
         response = self._verify_status_code_and_return_response()
         self.assertEqual(response["hits"]["total"], 1)
         self.assertEqual(response["hits"]["hits"][0]["_id"], u'171171')
-
-    def test_search_all_entries(self):
-        self.es_connection.search(self.stop)
-        response = self._verify_status_code_and_return_response()
-        self.assertEqual(response["hits"]["total"], 28)
 
     def test_search_specific_index(self):
         self.es_connection.search(callback=self.stop, index="outroteste")
@@ -87,9 +82,9 @@ class TestESConnection(AsyncTestCase):
         self.assertListEqual([], self.es_connection.bulk.bulk_list)
 
     def _make_multisearch(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.multi_search(index="teste", source=source)
-        source = {"query": {"text": {"_id": "101010"}}}
+        source = {"query": {"term": {"_id": "101010"}}}
         self.es_connection.multi_search(index="neverEndIndex", source=source)
 
         self.es_connection.apply_search(callback=self.stop)
@@ -116,7 +111,6 @@ class TestESConnection(AsyncTestCase):
             response_dict = self._verify_response_and_returns_dict(response)
             self.assertEqual(response_dict['_index'], 'test')
             self.assertEqual(response_dict['_type'], 'document')
-            self.assertTrue(response_dict['ok'])
             self.assertEqual(response_dict['_id'], doc_id)
             self.assertIn('refresh=True', response.request.url)
         finally:
@@ -125,15 +119,9 @@ class TestESConnection(AsyncTestCase):
             response = self._verify_status_code_and_return_response()
 
             self.assertTrue(response['found'])
-            self.assertTrue(response['ok'])
             self.assertEqual(response['_index'], 'test')
             self.assertEqual(response['_type'], 'document')
             self.assertEqual(response['_id'], doc_id)
-
-    def test_count_all_entries(self):
-        self.es_connection.count(callback=self.stop)
-        response = self._verify_status_code_and_return_response()
-        self.assertEqual(response["count"], 28)
 
     def test_count_specific_index(self):
         self.es_connection.count(callback=self.stop, index="outroteste")
@@ -146,13 +134,13 @@ class TestESConnection(AsyncTestCase):
         self.assertEqual(response["count"], 2)
 
     def test_count_specific_query(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.count(callback=self.stop, source=source)
         response = self._verify_status_code_and_return_response()
         self.assertEqual(response["count"], 1)
 
     def test_count_specific_query_with_parameters(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         parameters = {'refresh': True}
         self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         response = self.wait()
@@ -161,7 +149,7 @@ class TestESConnection(AsyncTestCase):
         self.assertTrue(response.request.url.endswith('_count?refresh=True'))
 
     def test_count_specific_query_with_many_parameters(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         parameters = {'df': '_id', 'test': True}
         self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         response = self.wait()
@@ -193,19 +181,13 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
     @gen_test
     def test_search_for_specific_type_with_query(self):
         response = yield self.es_connection.search(
-            source={"query": {"text": {"ID": "171171"}}},
+            source={"query": {"term": {"ID": "171171"}}},
             type="materia", index="teste"
         )
 
         response = self._verify_status_code_and_return_response(response)
         self.assertEqual(response["hits"]["total"], 1)
         self.assertEqual(response["hits"]["hits"][0]["_id"], u'171171')
-
-    @gen_test
-    def test_search_all_entries(self):
-        response = yield self.es_connection.search()
-        response = self._verify_status_code_and_return_response(response)
-        self.assertEqual(response["hits"]["total"], 28)
 
     @gen_test
     def test_search_specific_index(self):
@@ -255,7 +237,6 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
             response_dict = self._verify_status_code_and_return_response(response)
             self.assertEqual(response_dict['_index'], 'test')
             self.assertEqual(response_dict['_type'], 'document')
-            self.assertTrue(response_dict['ok'])
             self.assertEqual(response_dict['_id'], doc_id)
             self.assertIn('refresh=True', response.request.url)
         finally:
@@ -264,15 +245,9 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
             response = self._verify_status_code_and_return_response(response)
 
             self.assertTrue(response['found'])
-            self.assertTrue(response['ok'])
             self.assertEqual(response['_index'], 'test')
             self.assertEqual(response['_type'], 'document')
             self.assertEqual(response['_id'], doc_id)
-
-    @gen_test
-    def test_count_all_entries(self):
-        response = yield self.es_connection.count()
-        self.assertCount(response, 28)
 
     @gen_test
     def test_count_specific_index(self):
@@ -286,13 +261,13 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
 
     @gen_test
     def test_count_specific_query(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         response = yield self.es_connection.count(source=source)
         self.assertCount(response, 1)
 
     @gen_test
     def test_count_specific_query_with_parameters(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         parameters = {'refresh': True}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
@@ -300,7 +275,7 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
 
     @gen_test
     def test_count_specific_query_with_many_parameters(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         parameters = {'df': '_id', 'test': True}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
@@ -311,9 +286,9 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
         self.assertEqual(response_dict["count"], count)
 
     def _make_multisearch(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.multi_search(index="teste", source=source)
-        source = {"query": {"text": {"_id": "101010"}}}
+        source = {"query": {"term": {"_id": "101010"}}}
         self.es_connection.multi_search(index="neverEndIndex", source=source)
 
     def _verify_status_code_and_return_response(self, response):
