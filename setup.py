@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = '2.0.0'
+VERSION = '2.0.1'
 
 setup(
     name='tornadoes',
@@ -19,7 +19,7 @@ setup(
     include_package_data=True,
     zip_safe=True,
     install_requires=[
-        'tornado>=3.0.0,<=3.2.0',
+        'tornado>=3.0.0,<=3.2.1',
     ],
     tests_require=[
         'unittest2',
