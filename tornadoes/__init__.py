@@ -12,11 +12,13 @@ from tornado.concurrent import return_future
 
 class ESConnection(object):
 
-    def __init__(self, host='localhost', port='9200', io_loop=None):
+    def __init__(self, host='localhost', port='9200', io_loop=None, protocol='http'):
         self.io_loop = io_loop or IOLoop.instance()
-        self.url = "http://%(host)s:%(port)s" % {"host": host, "port": port}
+        self.url = "%(protocol)s://%(host)s:%(port)s" % {"protocol": protocol, "host": host, "port": port}
         self.bulk = BulkList()
         self.client = AsyncHTTPClient(self.io_loop)
+        self.httprequest_kwargs = {}     #extra kwargs passed to tornado's HTTPRequest class
+                                         #e.g. request_timeout
 
     def create_path(self, method, **kwargs):
         index = kwargs.get('index', '_all')
@@ -61,13 +63,13 @@ class ESConnection(object):
 
     def post_by_path(self, path, callback, source):
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        request_http = HTTPRequest(url, method="POST", body=source)
+        request_http = HTTPRequest(url, method="POST", body=source, **self.httprequest_kwargs)
         self.client.fetch(request=request_http, callback=callback)
 
     @return_future
     def get_by_path(self, path, callback):
         url = '%(url)s%(path)s' % {"url": self.url, "path": path}
-        self.client.fetch(url, callback)
+        self.client.fetch(url, callback, **self.httprequest_kwargs)
 
     @return_future
     def get(self, index, type, uid, callback):
@@ -110,7 +112,8 @@ class ESConnection(object):
             "path": path,
             "querystring": urlencode(parameters or {})
         }
-        request_arguments = dict(method=method)
+        request_arguments = dict(self.httprequest_kwargs)
+        request_arguments['method'] = method
 
         if body is not None:
             request_arguments['body'] = body
