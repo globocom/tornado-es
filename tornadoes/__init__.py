@@ -12,9 +12,9 @@ from tornado.concurrent import return_future
 
 class ESConnection(object):
 
-    def __init__(self, host='localhost', port='9200', io_loop=None):
+    def __init__(self, host='localhost', port='9200', io_loop=None, protocol='http'):
         self.io_loop = io_loop or IOLoop.instance()
-        self.url = "http://%(host)s:%(port)s" % {"host": host, "port": port}
+        self.url = "%(protocol)s://%(host)s:%(port)s" % {"protocol": protocol, "host": host, "port": port}
         self.bulk = BulkList()
         self.client = AsyncHTTPClient(self.io_loop)
         self.httprequest_kwargs = {}     #extra kwargs passed to tornado's HTTPRequest class
