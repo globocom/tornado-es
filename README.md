@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/globocom/tornado-es.png)](https://api.travis-ci.org/globocom/tornado-es)
+[![Build Status](https://secure.travis-ci.org/globocom/tornado-es.png?branch=master)](https://travis-ci.org/globocom/tornado-es)
 
 Tornado-es
 ==========
