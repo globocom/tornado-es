@@ -1,13 +1,20 @@
 language: python
 python:
-  - "2.7"
-install: "pip install -r test-requirements.txt --use-mirrors"
-# command to run tests
-script: python setup.py install && ./run test
+    - "2.7"
 
-branches:
-  only:
-    - master
+before_install:
+    - sudo apt-get purge elasticsearch -fy
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.13.deb
+    - sudo dpkg -i elasticsearch-0.90.13.deb
+    - sudo service elasticsearch restart
+    - sleep 10  # Let it breathe! :D
 
-services:
-  - elasticsearch
+install:
+    - /usr/share/elasticsearch/bin/elasticsearch -v
+
+before_script:
+    - curl http://localhost:9200/  # Check if ES is up and listening
+
+script:
+    - python setup.py install
+    - ./run test
