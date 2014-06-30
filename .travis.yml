@@ -10,11 +10,10 @@ before_install:
     - sleep 10  # Let it breathe! :D
 
 install:
-    - /usr/share/elasticsearch/bin/elasticsearch -v
+    - python setup.py install
 
 before_script:
     - curl http://localhost:9200/  # Check if ES is up and listening
 
 script:
-    - python setup.py install
     - ./run test
