@@ -4,7 +4,7 @@ import json
 
 from tornadoes.models import BulkList
 
-from urllib import urlencode
+from six.moves.urllib.parse import urlencode
 from tornado.ioloop import IOLoop
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from tornado.concurrent import return_future
