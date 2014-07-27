@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import json
 import threading
+
+from tornado.escape import json_encode
 
 
 class BulkList(object):
@@ -14,7 +15,7 @@ class BulkList(object):
     def add(self, index, source):
         with self.lock:
             command = {"index": index} if index else {}
-            source = "%s\n%s" % (json.dumps(command), json.dumps(source))
+            source = "%s\n%s" % (json_encode(command), json_encode(source))
             self.bulk_list.append(source)
 
     def prepare_search(self):

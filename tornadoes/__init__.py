@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import json
-
 from tornadoes.models import BulkList
 
 from six.moves.urllib.parse import urlencode
+from tornado.escape import json_encode, json_decode
 from tornado.ioloop import IOLoop
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from tornado.concurrent import return_future
@@ -47,7 +46,7 @@ class ESConnection(object):
     @return_future
     def search(self, callback, **kwargs):
         path = self.create_path("search", **kwargs)
-        source = json.dumps(kwargs.get('source', {"query": {"query_string": {"query": "*"}}}))
+        source = json_encode(kwargs.get('source', {"query": {"query_string": {"query": "*"}}}))
         self.post_by_path(path, callback, source)
 
     def multi_search(self, index, source):
@@ -74,14 +73,14 @@ class ESConnection(object):
     @return_future
     def get(self, index, type, uid, callback):
         def to_dict_callback(response):
-            source = json.loads(response.body).get('_source', {})
+            source = json_decode(response.body).get('_source', {})
             callback(source)
         self.request_document(index, type, uid, callback=to_dict_callback)
 
     @return_future
     def put(self, index, type, uid, contents, parameters=None, callback=None):
         self.request_document(
-            index, type, uid, "PUT", body=json.dumps(contents),
+            index, type, uid, "PUT", body=json_encode(contents),
             parameters=parameters, callback=callback)
 
     @return_future
@@ -101,7 +100,7 @@ class ESConnection(object):
             path += '?{}'.format(urlencode(parameters or {}))
 
         if source:
-            source = json.dumps(source)
+            source = json_encode(source)
 
         self.post_by_path(path=path, callback=callback, source=source)
 
