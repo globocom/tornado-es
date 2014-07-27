@@ -2,7 +2,7 @@
 
 import json
 
-from models import BulkList
+from tornadoes.models import BulkList
 
 from urllib import urlencode
 from tornado.ioloop import IOLoop
