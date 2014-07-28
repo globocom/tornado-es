@@ -11,7 +11,7 @@ from tornado.ioloop import IOLoop
 class TestESConnection(AsyncTestCase):
 
     def setUp(self):
-        self.io_loop = self.get_new_ioloop()
+        super(TestESConnection, self).setUp()
         self.es_connection = ESConnection("localhost", "9200", self.io_loop)
 
     def tearDown(self):
@@ -174,7 +174,7 @@ class TestESConnection(AsyncTestCase):
 class TestESConnectionWithTornadoGen(AsyncTestCase):
 
     def setUp(self):
-        self.io_loop = self.get_new_ioloop()
+        super(TestESConnectionWithTornadoGen, self).setUp()
         self.es_connection = ESConnection("localhost", "9200", self.io_loop)
 
     def tearDown(self):
