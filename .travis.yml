@@ -10,10 +10,12 @@ before_install:
     - sleep 10  # Let it breathe! :D
 
 install:
+    - make setup
     - python setup.py install
 
 before_script:
     - curl http://localhost:9200/  # Check if ES is up and listening
+    - ./run bulk
 
 script:
-    - ./run test
+    - make test
