@@ -155,7 +155,8 @@ class TestESConnection(AsyncTestCase):
         response = self.wait()
         response_dict = self._verify_response_and_returns_dict(response)
         self.assertEqual(response_dict["count"], 1)
-        self.assertTrue(response.request.url.endswith('_count?df=_id&test=True'))
+        self.assertTrue('df=_id' in response.request.url)
+        self.assertTrue('test=True' in response.request.url)
 
 
 class TestESConnectionWithTornadoGen(AsyncTestCase):
@@ -279,7 +280,8 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
         parameters = {'df': '_id', 'test': True}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
-        self.assertTrue(response.request.url.endswith('_count?df=_id&test=True'))
+        self.assertTrue('df=_id' in response.request.url)
+        self.assertTrue('test=True' in response.request.url)
 
     def assertCount(self, response, count):
         response_dict = self._verify_status_code_and_return_response(response)
