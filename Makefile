@@ -27,3 +27,6 @@ unit:
 
 coverage-html: unit
 	@coverage html -d cover
+
+tox:
+	@tox
