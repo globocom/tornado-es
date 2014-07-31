@@ -19,5 +19,14 @@ bulk:
 	# creates test data
 	@./run bulk
 
-test: clean
-	@python run_tests.py
+test: clean unit
+
+unit:
+	@coverage run --branch `which nosetests` -vv --with-yanc -s tornadoes/tests/
+	@coverage report -m --fail-under=80
+
+coverage-html: unit
+	@coverage html -d cover
+
+tox:
+	@tox

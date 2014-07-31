@@ -1,4 +1,6 @@
 -r requirements.txt
 
-unittest2
+coverage
 nose
+tox
+yanc
