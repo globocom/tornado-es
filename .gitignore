@@ -6,3 +6,4 @@ tornadoes.egg-info/
 .project
 .settings/
 .coverage
+.tox/
