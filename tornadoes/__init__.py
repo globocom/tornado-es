@@ -75,11 +75,11 @@ class ESConnection(object):
         self.client.fetch(url, callback, **self.httprequest_kwargs)
 
     @return_future
-    def get(self, index, type, uid, callback):
+    def get(self, index, type, uid, callback, parameters=None):
         def to_dict_callback(response):
             source = json_decode(response.body)
             callback(source)
-        self.request_document(index, type, uid, callback=to_dict_callback)
+        self.request_document(index, type, uid, callback=to_dict_callback, parameters=parameters)
 
     @return_future
     def put(self, index, type, uid, contents, parameters=None, callback=None):
