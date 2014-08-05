@@ -44,9 +44,9 @@ class TestESConnection(AsyncTestCase):
         response = self._verify_status_code_and_return_response()
         self.assertEqual(response["hits"]["total"], 2)
 
-    def test_should_access_specific_documento(self):
+    def test_should_access_specific_document(self):
         self.es_connection.get(index="teste", type="materia", uid="171171", callback=self.stop)
-        response = self.wait()
+        response = self.wait()["_source"]
         self.assertEqual(response['Portal'], "G1")
         self.assertEqual(response['Macrotema'], "Noticias")
 
@@ -115,7 +115,7 @@ class TestESConnection(AsyncTestCase):
             self.assertIn('refresh=True', response.request.url)
         finally:
             self.es_connection.delete("test", "document", doc_id,
-                parameters={'refresh': True}, callback=self.stop)
+                                      parameters={'refresh': True}, callback=self.stop)
             response = self._verify_status_code_and_return_response()
 
             self.assertTrue(response['found'])
@@ -203,8 +203,9 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
         self.assertEqual(response["hits"]["total"], 2)
 
     @gen_test
-    def test_should_access_specific_documento(self):
+    def test_should_access_specific_document_using_tornado_gen(self):
         response = yield self.es_connection.get(index="teste", type="materia", uid="171171")
+        response = response["_source"]
         self.assertEqual(response['Portal'], "G1")
         self.assertEqual(response['Macrotema'], "Noticias")
 
@@ -242,7 +243,7 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
             self.assertIn('refresh=True', response.request.url)
         finally:
             response = yield self.es_connection.delete("test", "document", doc_id,
-                parameters={'refresh': True})
+                                                       parameters={'refresh': True})
             response = self._verify_status_code_and_return_response(response)
 
             self.assertTrue(response['found'])

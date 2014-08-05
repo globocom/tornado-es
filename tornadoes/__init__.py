@@ -16,8 +16,8 @@ class ESConnection(object):
         self.url = "%(protocol)s://%(host)s:%(port)s" % {"protocol": protocol, "host": host, "port": port}
         self.bulk = BulkList()
         self.client = AsyncHTTPClient(self.io_loop)
-        self.httprequest_kwargs = {}     #extra kwargs passed to tornado's HTTPRequest class
-                                         #e.g. request_timeout
+        self.httprequest_kwargs = {}     # extra kwargs passed to tornado's HTTPRequest class
+                                         # e.g. request_timeout
 
     def create_path(self, method, **kwargs):
         index = kwargs.get('index', '_all')
@@ -46,7 +46,11 @@ class ESConnection(object):
     @return_future
     def search(self, callback, **kwargs):
         path = self.create_path("search", **kwargs)
-        source = json_encode(kwargs.get('source', {"query": {"query_string": {"query": "*"}}}))
+        source = json_encode(kwargs.get('source', {
+            "query": {
+                "match_all": {}
+            }
+        }))
         self.post_by_path(path, callback, source)
 
     def multi_search(self, index, source):
@@ -73,7 +77,7 @@ class ESConnection(object):
     @return_future
     def get(self, index, type, uid, callback):
         def to_dict_callback(response):
-            source = json_decode(response.body).get('_source', {})
+            source = json_decode(response.body)
             callback(source)
         self.request_document(index, type, uid, callback=to_dict_callback)
 
