@@ -31,7 +31,7 @@ setup(
     zip_safe=True,
     install_requires=[
         'tornado>=3.0.0,<4.1.0',
-        'six==1.7.3',
+        'six>=1.7.3',
     ],
     tests_require=[
         'unittest2',
