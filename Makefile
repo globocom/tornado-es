@@ -4,7 +4,7 @@ help:
 	@echo "Usage: make test -- Runs tests."
 
 setup:
-	pip install -r test-requirements.txt
+	pip install -U -r test-requirements.txt
 
 clean:
 	@echo "Cleaning up build and *.pyc files..."
