@@ -18,7 +18,7 @@ script:
     - sudo service elasticsearch start
     - sleep 10  # Let it breathe! :D
     - curl http://localhost:9200/  # Check if ES is up and listening
-    - ./run bulk  # Create indices and add some docs
+    - make bulk  # Create indices and add some docs
     - make test
     - sudo service elasticsearch stop
 
@@ -28,7 +28,7 @@ script:
     - sudo service elasticsearch start
     - sleep 10
     - curl http://localhost:9200/
-    - ./run bulk
+    - make bulk
     - make test
     - sudo service elasticsearch stop
 
@@ -38,7 +38,7 @@ script:
     - sudo service elasticsearch start
     - sleep 10
     - curl http://localhost:9200/
-    - ./run bulk
+    - make bulk
     - make test
     - sudo service elasticsearch stop
 
@@ -48,7 +48,7 @@ script:
     - sudo service elasticsearch start
     - sleep 10
     - curl http://localhost:9200/
-    - ./run bulk
+    - make bulk
     - make test
     - sudo service elasticsearch stop
 
@@ -58,7 +58,7 @@ script:
     - sudo service elasticsearch start
     - sleep 10
     - curl http://localhost:9200/
-    - ./run bulk
+    - make bulk
     - make test
     - sudo service elasticsearch stop
 
@@ -68,6 +68,6 @@ script:
     - sudo service elasticsearch start
     - sleep 10
     - curl http://localhost:9200/
-    - ./run bulk
+    - make bulk
     - make test
     - sudo service elasticsearch stop
