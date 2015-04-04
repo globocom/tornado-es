@@ -8,7 +8,7 @@ setup:
 
 clean:
 	@echo "Cleaning up build and *.pyc files..."
-	@find . -name '*.pyc' -exec rm -rf {} \;
+	@find . -name '*.pyc' -delete
 	@rm -rf .coverage
 	@rm -rf ./build
 	@rm -rf ./dist
