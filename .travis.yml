@@ -6,18 +6,68 @@ python:
 
 before_install:
     - sudo apt-get purge elasticsearch -fy
-    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.1.deb
-    - sudo dpkg -i elasticsearch-1.3.1.deb
-    - sudo service elasticsearch restart
-    - sleep 10  # Let it breathe! :D
 
 install:
     - make setup
     - python setup.py install
 
-before_script:
-    - curl http://localhost:9200/  # Check if ES is up and listening
-    - ./run bulk
-
 script:
+    # ES 1.0 branch
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.3.deb
+    - sudo dpkg -i --force-confnew elasticsearch-1.0.3.deb
+    - sudo service elasticsearch start
+    - sleep 10  # Let it breathe! :D
+    - curl http://localhost:9200/  # Check if ES is up and listening
+    - make bulk  # Create indices and add some docs
     - make test
+    - sudo service elasticsearch stop
+
+    # ES 1.1 branch
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.1.2.deb
+    - sudo dpkg -i --force-confnew elasticsearch-1.1.2.deb
+    - sudo service elasticsearch start
+    - sleep 10
+    - curl http://localhost:9200/
+    - make bulk
+    - make test
+    - sudo service elasticsearch stop
+
+    # ES 1.2 branch
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.4.deb
+    - sudo dpkg -i --force-confnew elasticsearch-1.2.4.deb
+    - sudo service elasticsearch start
+    - sleep 10
+    - curl http://localhost:9200/
+    - make bulk
+    - make test
+    - sudo service elasticsearch stop
+
+    # ES 1.3 branch
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.7.deb
+    - sudo dpkg -i --force-confnew elasticsearch-1.3.7.deb
+    - sudo service elasticsearch start
+    - sleep 10
+    - curl http://localhost:9200/
+    - make bulk
+    - make test
+    - sudo service elasticsearch stop
+
+    # ES 1.4 branch
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.4.deb
+    - sudo dpkg -i --force-confnew elasticsearch-1.4.4.deb
+    - sudo service elasticsearch start
+    - sleep 10
+    - curl http://localhost:9200/
+    - make bulk
+    - make test
+    - sudo service elasticsearch stop
+
+    # ES 1.5 branch
+    - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.5.0.deb
+    - sudo dpkg -i --force-confnew elasticsearch-1.5.0.deb
+    - sudo service elasticsearch start
+    - sleep 10
+    - curl http://localhost:9200/
+    - make bulk
+    - make test
+    - sudo service elasticsearch stop
