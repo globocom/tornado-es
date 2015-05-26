@@ -23,7 +23,7 @@ class ESConnection(object):
         index = kwargs.get('index', '_all')
         type_ = '/' + kwargs.get('type') if 'type' in kwargs else ''
         parameters = {}
-        for param in ['size', 'from', 'routing']:
+        for param in ['size', 'from', 'routing', 'search_type']:
             value = kwargs.get(param, None)
             if value:
                 parameters[param] = value
