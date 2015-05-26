@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = '1.7.1'
+VERSION = '2.3.2'
 
 setup(
     name='tornadoes',
@@ -30,8 +30,8 @@ setup(
     include_package_data=True,
     zip_safe=True,
     install_requires=[
-        'tornado>=3.0.0,<4.1.0',
-        'six==1.7.3',
+        'tornado>=3.0.0,<4.2.0',
+        'six>=1.7.3',
     ],
     tests_require=[
         'unittest2',
