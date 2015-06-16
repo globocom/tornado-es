@@ -16,27 +16,20 @@ class ESConnection(object):
         self.url = "%(protocol)s://%(host)s:%(port)s" % {"protocol": protocol, "host": host, "port": port}
         self.bulk = BulkList()
         self.client = AsyncHTTPClient(self.io_loop)
-        self.httprequest_kwargs = {}     # extra kwargs passed to tornado's HTTPRequest class
-                                         # e.g. request_timeout
+        self.httprequest_kwargs = {}     # extra kwargs passed to tornado's HTTPRequest class e.g. request_timeout
 
     def create_path(self, method, **kwargs):
-        index = kwargs.get('index', '_all')
-        type_ = '/' + kwargs.get('type') if 'type' in kwargs else ''
+        index = kwargs.pop('index', '_all')
+        doc_type = '/%s' % kwargs.pop('type', '')
+
         parameters = {}
-        for param in ['size', 'from', 'routing', 'search_type']:
-            value = kwargs.get(param, None)
-            if value:
-                parameters[param] = value
-        if 'page' in kwargs:
-            parameters.setdefault('size', 10)
-            parameters['from'] = (kwargs['page'] - 1) * parameters['size']
-        jsonp_callback = kwargs.get('jsonp_callback', '')
-        if jsonp_callback:
-            parameters['callback'] = jsonp_callback
+        for param, value in kwargs.items():
+            parameters[param] = value
+
         path = "/%(index)s%(type)s/_%(method)s" % {
             "method": method,
             "index": index,
-            "type": type_
+            "type": doc_type
         }
         if parameters:
             path += '?' + urlencode(parameters)
