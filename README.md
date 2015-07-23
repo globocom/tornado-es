@@ -71,3 +71,7 @@ Tornado program used to search the document previously indexed:
         application.listen(8888)
         tornado.ioloop.IOLoop.instance().start()
 
+Contributing
+============
+
+Fork, patch, test, and send a pull request.
