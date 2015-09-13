@@ -71,11 +71,21 @@ Tornado program used to search the document previously indexed:
         application.listen(8888)
         tornado.ioloop.IOLoop.instance().start()
 
-Tests
-============
-    With elasticsearch running:
 
-    ./run test
+Development
+===========
+
+Setup your development environment:
+
+    make setup
+
+> *Note: Don't forget to create a virtualenv first*
+
+Run tests:
+
+    make test
+
+> *Note: Make sure ElasticSearch is running on port 9200*
 
 
 Contributing
