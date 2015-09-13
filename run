@@ -12,7 +12,7 @@ bulk () {
 }
 
 dist () {
-	python setup.py -q sdist upload -r pypi
+    python setup.py -q sdist upload -r pypi
 }
 
 if [ $1 ]; then
