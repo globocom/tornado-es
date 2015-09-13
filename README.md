@@ -88,3 +88,9 @@ Contributing
 ============
 
 Fork, patch, test, and send a pull request.
+
+
+License
+=======
+
+[MIT](http://opensource.org/licenses/MIT) © [Globo.com](https://github.com/globocom)
