@@ -67,23 +67,23 @@ class TestESConnection(ESConnectionTestBase):
         self.assertEqual(response['Macrotema'], "Noticias")
 
     def test_should_accumulate_searches_before_search(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.multi_search("teste", source=source)
-        source = {"query": {"text": {"body": "multisearch"}}}
+        source = {"query": {"term": {"body": "multisearch"}}}
         self.es_connection.multi_search("neverEndIndex", source=source)
 
-        self.assertListEqual(['{"index": "teste"}\n{"query": {"text": {"_id": "171171"}}}',
-                              '{"index": "neverEndIndex"}\n{"query": {"text": {"body": "multisearch"}}}'
+        self.assertListEqual(['{"index": "teste"}\n{"query": {"term": {"_id": "171171"}}}',
+                              '{"index": "neverEndIndex"}\n{"query": {"term": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
     def test_should_generate_empty_header_with_no_index_specified(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.multi_search(index=None, source=source)
-        source = {"query": {"text": {"body": "multisearch"}}}
+        source = {"query": {"term": {"body": "multisearch"}}}
         self.es_connection.multi_search(index=None, source=source)
 
-        self.assertListEqual(['{}\n{"query": {"text": {"_id": "171171"}}}',
-                              '{}\n{"query": {"text": {"body": "multisearch"}}}'
+        self.assertListEqual(['{}\n{"query": {"term": {"_id": "171171"}}}',
+                              '{}\n{"query": {"term": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
     def test_should_make_two_searches(self):
