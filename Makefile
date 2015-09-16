@@ -19,7 +19,7 @@ bulk:
 	# creates test data
 	@./run bulk
 
-test: clean unit
+test: clean bulk unit
 
 unit:
 	@coverage run --branch `which nosetests` -vv --with-yanc -s tornadoes/tests/

@@ -8,16 +8,32 @@ from tornado.testing import AsyncTestCase, gen_test
 from tornado.ioloop import IOLoop
 
 
-class TestESConnection(AsyncTestCase):
+class ESConnectionTestBase(AsyncTestCase):
 
     def setUp(self):
-        super(TestESConnection, self).setUp()
+        super(ESConnectionTestBase, self).setUp()
         self.es_connection = ESConnection("localhost", "9200", self.io_loop)
+        self._set_version()
 
     def tearDown(self):
         if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):
             self.io_loop.close(all_fds=True)
         super(AsyncTestCase, self).tearDown()
+
+    def _set_version(self):
+        self.es_connection.get_by_path("/", self.stop)
+        response = self.wait()
+        response = escape.json_decode(response.body)
+        version = response['version']['number']
+        self.version = [int(n) for n in version.split('.') if n.isdigit()]
+
+    def _set_count_query(self, query):
+        if self.version[0] < 1:
+            return query['query']
+        return query
+
+
+class TestESConnection(ESConnectionTestBase):
 
     def test_simple_search(self):
         self.es_connection.get_by_path("/_search?q=_id:http\:\/\/localhost\/noticia\/2\/fast", self.stop)
@@ -51,23 +67,23 @@ class TestESConnection(AsyncTestCase):
         self.assertEqual(response['Macrotema'], "Noticias")
 
     def test_should_accumulate_searches_before_search(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.multi_search("teste", source=source)
-        source = {"query": {"text": {"body": "multisearch"}}}
+        source = {"query": {"term": {"body": "multisearch"}}}
         self.es_connection.multi_search("neverEndIndex", source=source)
 
-        self.assertListEqual(['{"index": "teste"}\n{"query": {"text": {"_id": "171171"}}}',
-                              '{"index": "neverEndIndex"}\n{"query": {"text": {"body": "multisearch"}}}'
+        self.assertListEqual(['{"index": "teste"}\n{"query": {"term": {"_id": "171171"}}}',
+                              '{"index": "neverEndIndex"}\n{"query": {"term": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
     def test_should_generate_empty_header_with_no_index_specified(self):
-        source = {"query": {"text": {"_id": "171171"}}}
+        source = {"query": {"term": {"_id": "171171"}}}
         self.es_connection.multi_search(index=None, source=source)
-        source = {"query": {"text": {"body": "multisearch"}}}
+        source = {"query": {"term": {"body": "multisearch"}}}
         self.es_connection.multi_search(index=None, source=source)
 
-        self.assertListEqual(['{}\n{"query": {"text": {"_id": "171171"}}}',
-                              '{}\n{"query": {"text": {"body": "multisearch"}}}'
+        self.assertListEqual(['{}\n{"query": {"term": {"_id": "171171"}}}',
+                              '{}\n{"query": {"term": {"body": "multisearch"}}}'
                               ], self.es_connection.bulk.bulk_list)
 
     def test_should_make_two_searches(self):
@@ -135,12 +151,14 @@ class TestESConnection(AsyncTestCase):
 
     def test_count_specific_query(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         self.es_connection.count(callback=self.stop, source=source)
         response = self._verify_status_code_and_return_response()
         self.assertEqual(response["count"], 1)
 
     def test_count_specific_query_with_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         parameters = {'refresh': True}
         self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         response = self.wait()
@@ -150,6 +168,7 @@ class TestESConnection(AsyncTestCase):
 
     def test_count_specific_query_with_many_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         parameters = {'df': '_id', 'test': True}
         self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         response = self.wait()
@@ -159,16 +178,7 @@ class TestESConnection(AsyncTestCase):
         self.assertTrue('test=True' in response.request.url)
 
 
-class TestESConnectionWithTornadoGen(AsyncTestCase):
-
-    def setUp(self):
-        super(TestESConnectionWithTornadoGen, self).setUp()
-        self.es_connection = ESConnection("localhost", "9200", self.io_loop)
-
-    def tearDown(self):
-        if (not IOLoop.initialized() or self.io_loop is not IOLoop.instance()):
-            self.io_loop.close(all_fds=True)
-        super(AsyncTestCase, self).tearDown()
+class TestESConnectionWithTornadoGen(ESConnectionTestBase):
 
     @gen_test
     def test_simple_search(self):
@@ -264,12 +274,14 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
     @gen_test
     def test_count_specific_query(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         response = yield self.es_connection.count(source=source)
         self.assertCount(response, 1)
 
     @gen_test
     def test_count_specific_query_with_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         parameters = {'refresh': True}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
@@ -278,6 +290,7 @@ class TestESConnectionWithTornadoGen(AsyncTestCase):
     @gen_test
     def test_count_specific_query_with_many_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         parameters = {'df': '_id', 'test': True}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
