@@ -108,3 +108,13 @@ script:
     - curl http://localhost:9200/
     - make test
     - sudo service elasticsearch stop
+
+    # ES 2.3.3 branch
+    - wget https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.3/elasticsearch-2.3.3.deb
+    - sudo apt-get purge elasticsearch -fy
+    - sudo dpkg -i --force-confnew elasticsearch-2.3.3.deb
+    - sudo service elasticsearch start
+    - sleep 10
+    - curl http://localhost:9200/
+    - make test
+    - sudo service elasticsearch stop
