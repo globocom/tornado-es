@@ -6,6 +6,7 @@ from tornadoes import ESConnection
 from tornado import escape
 from tornado.testing import AsyncTestCase, gen_test
 from tornado.ioloop import IOLoop
+from mock import Mock
 
 
 class ESConnectionTestBase(AsyncTestCase):
@@ -288,14 +289,21 @@ class TestESConnectionWithTornadoGen(ESConnectionTestBase):
         self.assertTrue(response.request.url.endswith('_count?refresh=True'))
 
     @gen_test
-    def test_count_specific_query_with_many_parameters(self):
-        source = {"query": {"term": {"_id": "171171"}}}
-        source = self._set_count_query(source)
-        parameters = {'df': '_id', 'test': True}
-        response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
-        self.assertCount(response, 1)
-        self.assertTrue('df=_id' in response.request.url)
-        self.assertTrue('test=True' in response.request.url)
+    def test_use_of_custom_http_clients(self):
+        mocked_http_client = Mock()
+        mocked_http_client.fetch = Mock()
+
+        es_connection = ESConnection("localhost",
+                                     "9200",
+                                     self.io_loop,
+                                     custom_client=mocked_http_client)
+
+        es_connection.search(callback=self.stop,
+                             source={"query": {"term": {"ID": "171171"}}},
+                             type="materia", index="teste")
+
+        mocked_http_client.fetch.assert_called()
+
 
     def assertCount(self, response, count):
         response_dict = self._verify_status_code_and_return_response(response)
