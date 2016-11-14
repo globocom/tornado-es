@@ -81,6 +81,18 @@ class ESConnection(object):
             parameters=parameters, callback=callback)
 
     @return_future
+    def update(self, index, type, uid, contents, callback=None):
+        path = "/%(index)s/%(type)s/%(uid)s/_update" % {
+            "index": index,
+            "type": type,
+            "uid": uid
+        }
+
+        partial = { "doc": contents }
+
+        self.post_by_path(path, callback, source=json_encode(partial))
+
+    @return_future
     def delete(self, index, type, uid, parameters=None, callback=None):
         self.request_document(index, type, uid, "DELETE", parameters=parameters, callback=callback)
 

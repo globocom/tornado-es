@@ -140,6 +140,19 @@ class TestESConnection(ESConnectionTestBase):
             self.assertEqual(response['_type'], 'document')
             self.assertEqual(response['_id'], doc_id)
 
+    def test_update_partial_document(self):
+        uid = escape.url_escape("http://localhost/noticia/5/fast")
+        self.es_connection.update(index='teste',
+                                  type='materia',
+                                  uid=uid,
+                                  contents={"Tags": "nova"},
+                                  callback=self.stop)
+
+        response = self._verify_status_code_and_return_response()
+
+        self.assertEqual(response["_index"], 'teste')
+        self.assertEqual(response["_version"], 2)
+
     def test_count_specific_index(self):
         self.es_connection.count(callback=self.stop, index="outroteste")
         response = self._verify_status_code_and_return_response()
