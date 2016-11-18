@@ -11,11 +11,11 @@ from tornado.concurrent import return_future
 
 class ESConnection(object):
 
-    def __init__(self, host='localhost', port='9200', io_loop=None, protocol='http'):
+    def __init__(self, host='localhost', port='9200', io_loop=None, protocol='http', custom_client=None):
         self.io_loop = io_loop or IOLoop.instance()
         self.url = "%(protocol)s://%(host)s:%(port)s" % {"protocol": protocol, "host": host, "port": port}
         self.bulk = BulkList()
-        self.client = AsyncHTTPClient(self.io_loop)
+        self.client = custom_client or AsyncHTTPClient(self.io_loop)
         self.httprequest_kwargs = {}     # extra kwargs passed to tornado's HTTPRequest class e.g. request_timeout
 
     def create_path(self, method, **kwargs):
@@ -79,6 +79,18 @@ class ESConnection(object):
         self.request_document(
             index, type, uid, "PUT", body=json_encode(contents),
             parameters=parameters, callback=callback)
+
+    @return_future
+    def update(self, index, type, uid, contents, callback=None):
+        path = "/%(index)s/%(type)s/%(uid)s/_update" % {
+            "index": index,
+            "type": type,
+            "uid": uid
+        }
+
+        partial = { "doc": contents }
+
+        self.post_by_path(path, callback, source=json_encode(partial))
 
     @return_future
     def delete(self, index, type, uid, parameters=None, callback=None):
