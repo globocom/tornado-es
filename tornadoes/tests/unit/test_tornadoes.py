@@ -317,6 +317,15 @@ class TestESConnectionWithTornadoGen(ESConnectionTestBase):
 
         mocked_http_client.fetch.assert_called()
 
+    @gen_test
+    def test_initilize_client_from_uri(self):
+        es_connection = ESConnection.from_uri("https://dummy.server:1234/")
+        self.assertEqual(es_connection.url, "https://dummy.server:1234")
+
+    @gen_test
+    def test_initilize_client_from_invalid_uri(self):
+        with self.assertRaises(ValueError):
+            ESConnection.from_uri("<<invalid:1234uri/")
 
     def assertCount(self, response, count):
         response_dict = self._verify_status_code_and_return_response(response)
