@@ -2,7 +2,7 @@
 
 from tornadoes.models import BulkList
 
-from six.moves.urllib.parse import urlencode
+from six.moves.urllib.parse import urlencode, urlparse
 from tornado.escape import json_encode, json_decode
 from tornado.ioloop import IOLoop
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
@@ -17,6 +17,21 @@ class ESConnection(object):
         self.bulk = BulkList()
         self.client = custom_client or AsyncHTTPClient(self.io_loop)
         self.httprequest_kwargs = {}     # extra kwargs passed to tornado's HTTPRequest class e.g. request_timeout
+
+    @staticmethod
+    def from_uri(uri, io_loop=None, custom_client=None):
+        parsed = urlparse(uri)
+
+        if not parsed.hostname or not parsed.scheme:
+            raise ValueError('Invalid URI')
+
+        return ESConnection(**{
+            'host': parsed.hostname,
+            'protocol': parsed.scheme,
+            'port': parsed.port,
+            'io_loop': io_loop,
+            'custom_client': custom_client
+        })
 
     def create_path(self, method, **kwargs):
         index = kwargs.pop('index', '_all')
