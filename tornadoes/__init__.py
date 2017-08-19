@@ -12,7 +12,6 @@ from tornado.concurrent import return_future
 class ESConnection(object):
     _MATCH_ALL_QUERY = {"query": {"match_all": {}}}
 
-    # TODO : timeout, max_retries, retry_on_timeout
     def __init__(self, host='localhost', port='9200', io_loop=None, protocol='http', custom_client=None,
                  http_request_kwargs=None):
         self.io_loop = io_loop or IOLoop.instance()
