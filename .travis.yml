@@ -121,6 +121,7 @@ script:
 
     # ES 5.0 branch
     - wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.0.0.deb
+    - sudo apt-get install oracle-java8-set-default
     - sudo apt-get purge elasticsearch -fy
     - sudo dpkg -i --force-confnew elasticsearch-5.0.0.deb
     - sudo service elasticsearch start
@@ -131,6 +132,7 @@ script:
 
     # ES 5.5.1 branch
     - wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.deb
+    - sudo apt-get install oracle-java8-set-default
     - sudo apt-get purge elasticsearch -fy
     - sudo dpkg -i --force-confnew elasticsearch-5.5.1.deb
     - sudo service elasticsearch start
