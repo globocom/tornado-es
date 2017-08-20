@@ -302,6 +302,7 @@ class TestESConnectionWithTornadoGen(ESConnectionTestBase):
     @gen_test
     def test_count_specific_query_with_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
+        source = self._set_count_query(source)
         parameters = {'terminate_after': 5}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
