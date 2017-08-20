@@ -178,7 +178,7 @@ class TestESConnection(ESConnectionTestBase):
         parameters = {'refresh': True}
         self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         response = self.wait()
-        if self.version < 5:
+        if self.version[0] < 5:
             self.assertTrue(response.code in [200, 201], "Wrong response code: %d." % response.code)
         else:
             self.assertEqual(response.code, 400)
