@@ -8,6 +8,8 @@ from tornado.testing import AsyncTestCase, gen_test
 from tornado.ioloop import IOLoop
 from mock import Mock
 
+from six.moves.urllib.parse import urlencode
+
 
 class ESConnectionTestBase(AsyncTestCase):
 
@@ -129,7 +131,7 @@ class TestESConnection(ESConnectionTestBase):
             self.assertEqual(response_dict['_index'], 'test')
             self.assertEqual(response_dict['_type'], 'document')
             self.assertEqual(response_dict['_id'], doc_id)
-            self.assertIn('refresh=True', response.request.url)
+            self.assertIn('refresh=true', response.request.url)
         finally:
             self.es_connection.delete("test", "document", doc_id,
                                       parameters={'refresh': True}, callback=self.stop)
@@ -170,26 +172,24 @@ class TestESConnection(ESConnectionTestBase):
         response = self._verify_status_code_and_return_response()
         self.assertEqual(response["count"], 1)
 
-    def test_count_specific_query_with_parameters(self):
+    def test_count_specific_query_with_illegal_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
         source = self._set_count_query(source)
         parameters = {'refresh': True}
         self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         response = self.wait()
-        response_dict = self._verify_response_and_returns_dict(response)
-        self.assertEqual(response_dict["count"], 1)
-        self.assertTrue(response.request.url.endswith('_count?refresh=True'))
+        if self.version[0] < 5:
+            self.assertTrue(response.code in [200, 201], "Wrong response code: %d." % response.code)
+        else:
+            self.assertEqual(response.code, 400)
 
     def test_count_specific_query_with_many_parameters(self):
-        source = {"query": {"term": {"_id": "171171"}}}
-        source = self._set_count_query(source)
-        parameters = {'df': '_id', 'test': True}
-        self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
+        parameters = {'df': '_id', 'q': '_id:171171'}
+        self.es_connection.count(callback=self.stop, parameters=parameters)
         response = self.wait()
         response_dict = self._verify_response_and_returns_dict(response)
         self.assertEqual(response_dict["count"], 1)
         self.assertTrue('df=_id' in response.request.url)
-        self.assertTrue('test=True' in response.request.url)
 
 
 class TestESConnectionWithTornadoGen(ESConnectionTestBase):
@@ -264,7 +264,7 @@ class TestESConnectionWithTornadoGen(ESConnectionTestBase):
             self.assertEqual(response_dict['_index'], 'test')
             self.assertEqual(response_dict['_type'], 'document')
             self.assertEqual(response_dict['_id'], doc_id)
-            self.assertIn('refresh=True', response.request.url)
+            self.assertIn('refresh=true', response.request.url)
         finally:
             response = yield self.es_connection.delete("test", "document", doc_id,
                                                        parameters={'refresh': True})
@@ -293,13 +293,20 @@ class TestESConnectionWithTornadoGen(ESConnectionTestBase):
         self.assertCount(response, 1)
 
     @gen_test
+    def test_count_specific_query_as_parameter_with_additional_parameters(self):
+        parameters = {'q': '_id:171171', 'df': '_id'}
+        response = yield self.es_connection.count(callback=self.stop, parameters=parameters)
+        self.assertCount(response, 1)
+        self.assertTrue(response.request.url.endswith('_count?' + urlencode(parameters)))
+
+    @gen_test
     def test_count_specific_query_with_parameters(self):
         source = {"query": {"term": {"_id": "171171"}}}
         source = self._set_count_query(source)
-        parameters = {'refresh': True}
+        parameters = {'terminate_after': 5}
         response = yield self.es_connection.count(callback=self.stop, source=source, parameters=parameters)
         self.assertCount(response, 1)
-        self.assertTrue(response.request.url.endswith('_count?refresh=True'))
+        self.assertTrue(response.request.url.endswith('_count?' + urlencode(parameters)))
 
     @gen_test
     def test_use_of_custom_http_clients(self):

@@ -1,6 +1,6 @@
 -r requirements.txt
 -e .
-coverage
+coverage==4.2
 nose
 tox
 yanc
